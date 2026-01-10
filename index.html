@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%2314b8a6' d='M137.4 40.3c-4.2-7.3-11.8-11.5-20-11.5H29.2c-16.8 0-28 17.4-20.7 32.5l88.4 182.3c4.2 8.6 13 14 22.4 14h165.6c8.8 0 16-7.2 16-16s-7.2-16-16-16H135.2L46.8 60.8h69.7l39.2 67.7c4.4 7.7 14.2 10.3 21.9 5.9s10.3-14.2 5.9-21.9L137.4 40.3zm199.1 0c-8.8 0-16 7.2-16 16s7.2 16 16 16h116.7l-88.4 182.3h-69.7l-39.2-67.7c-4.4-7.7-14.2-10.3-21.9-5.9s-10.3 14.2-5.9 21.9l46.2 79.9c4.2 7.3 11.8 11.5 20 11.5h103.4c16.8 0 28-17.4 20.7-32.5l-88.4-182.3c-4.2-8.6-13-14-22.4-14H336.5zm-143.9 245.7c-4.2-7.3-11.8-11.5-20-11.5H69.2c-16.8 0-28 17.4-20.7 32.5l88.4 182.3c4.2 8.6 13 14 22.4 14h165.6c8.8 0 16-7.2 16-16s-7.2-16-16-16H135.2l-88.4-182.3h69.7l39.2 67.7c4.4 7.7 14.2 10.3 21.9 5.9s10.3-14.2 5.9-21.9L192.6 286z'/%3E%3C/svg%3E">
+    <title>UNI THRIFT - Student Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0d9488',
+                        'primary-dark': '#0f766e',
+                        'primary-light': '#14b8a6',
+                        secondary: '#f0fdfa',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
+        .section { display: none; min-height: 100vh; animation: fadeIn 0.4s ease-out; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .gradient-bg { background: linear-gradient(135deg, #0d9488 0%, #115e59 100%); }
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+        
+        .input-style { transition: all 0.2s; }
+        .input-style:focus { border-color: #0d9488; box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1); }
+        
+        .btn-primary { background: #0d9488; transition: all 0.2s; }
+        .btn-primary:hover { background: #0f766e; transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(0); }
+
+        /* Chat Bubbles */
+        .chat-bubble-left { background: #f3f4f6; border-radius: 18px 18px 18px 4px; }
+        .chat-bubble-right { background: #0d9488; border-radius: 18px 18px 4px 18px; color: white; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <section id="auth-section" class="section active">
+        <div class="min-h-screen gradient-bg flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col md:flex-row h-[600px]">
+                <div class="hidden md:flex w-1/2 bg-gray-100 items-center justify-center relative overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-90">
+                    <div class="absolute inset-0 bg-teal-900/40 mix-blend-multiply"></div>
+                    <div class="relative z-10 text-center text-white p-8">
+                        <i class="fas fa-recycle text-6xl mb-4"></i>
+                        <h2 class="text-3xl font-bold mb-2">UNI THRIFT</h2>
+                        <p class="text-white/90">The sustainable marketplace for students.</p>
+                    </div>
+                </div>
+
+                <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center relative">
+                    <div id="login-form" class="transition-all duration-300">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">Welcome Back!</h2>
+                        <p class="text-gray-500 mb-8">Login to continue to the marketplace.</p>
+                        <form id="login-form-element" class="space-y-5">
+                            <div>
+                                <label class="text-sm font-semibold text-gray-700">Email</label>
+                                <input type="email" id="login-email" class="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl input-style outline-none" placeholder="student@university.edu" required>
+                            </div>
+                            <div>
+                                <label class="text-sm font-semibold text-gray-700">Password</label>
+                                <input type="password" id="login-password" class="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl input-style outline-none" placeholder="••••••••" required>
+                            </div>
+                            <button type="submit" class="w-full py-3.5 btn-primary text-white font-bold rounded-xl shadow-lg shadow-teal-500/30">Sign In</button>
+                        </form>
+                        <p class="text-center text-gray-600 mt-6">New here? <a href="#" id="show-register" class="text-primary font-bold hover:underline">Create an account</a></p>
+                    </div>
+
+                    <div id="register-form" class="hidden transition-all duration-300">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">Join UniThrift</h2>
+                        <p class="text-gray-500 mb-8">Start buying and selling on campus today.</p>
+                        <form id="register-form-element" class="space-y-5">
+                            <div>
+                                <label class="text-sm font-semibold text-gray-700">Full Name</label>
+                                <input type="text" id="register-name" class="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl input-style outline-none" placeholder="e.g. Emre Yasar" required>
+                            </div>
+                            <div>
+                                <label class="text-sm font-semibold text-gray-700">Email</label>
+                                <input type="email" id="register-email" class="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl input-style outline-none" placeholder="student@university.edu" required>
+                            </div>
+                            <div>
+                                <label class="text-sm font-semibold text-gray-700">Password</label>
+                                <input type="password" id="register-password" class="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl input-style outline-none" placeholder="Create a password" required>
+                            </div>
+                            <button type="submit" class="w-full py-3.5 btn-primary text-white font-bold rounded-xl shadow-lg shadow-teal-500/30">Create Account</button>
+                        </form>
+                        <p class="text-center text-gray-600 mt-6">Already have an account? <a href="#" id="show-login" class="text-primary font-bold hover:underline">Sign In</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="home-section" class="section">
+        <nav class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
+            <div class="container mx-auto px-4">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center space-x-2 cursor-pointer" onclick="navigateTo('home-section')">
+                        <div class="w-9 h-9 bg-primary text-white rounded-lg flex items-center justify-center shadow-lg shadow-teal-500/30">
+                            <i class="fas fa-recycle text-lg"></i>
+                        </div>
+                        <span class="text-xl font-bold text-gray-800 tracking-tight">UNI THRIFT</span>
+                    </div>
+
+                    <div class="hidden md:flex flex-1 max-w-lg mx-8">
+                        <div class="relative w-full group">
+                            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors"></i>
+                            <input type="text" id="search-input" class="w-full pl-11 pr-4 py-2.5 bg-gray-100 border-transparent focus:bg-white border focus:border-primary rounded-full outline-none transition-all" placeholder="Search textbooks, furniture...">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <button onclick="navigateTo('chat-section')" class="relative text-gray-500 hover:text-primary transition-colors">
+                            <i class="fas fa-comment-dots text-xl"></i>
+                            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">2</span>
+                        </button>
+                        
+                        <div class="flex items-center space-x-2 cursor-pointer border-l pl-4 border-gray-200" onclick="toggleProfileModal()">
+                            <div class="text-right hidden sm:block">
+                                <p id="nav-user-name" class="text-sm font-bold text-gray-800 leading-none">Student</p>
+                                <p class="text-[10px] text-green-500 font-bold uppercase tracking-wider">Online</p>
+                            </div>
+                            <img id="nav-user-img" src="https://ui-avatars.com/api/?name=Student&background=0d9488&color=fff" class="w-9 h-9 rounded-full ring-2 ring-white shadow-sm">
+                        </div>
+
+                        <button onclick="navigateTo('sell-section')" class="hidden sm:flex items-center px-5 py-2 btn-primary text-white rounded-full font-bold text-sm shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40 transition-all">
+                            <i class="fas fa-plus mr-2"></i> Sell Item
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="relative bg-teal-900 overflow-hidden">
+            <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+            <div class="container mx-auto px-4 py-16 relative z-10 text-center">
+                <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">Find What You Need on Campus</h1>
+                <p class="text-teal-100 text-lg mb-8 max-w-2xl mx-auto">The safest way to buy and sell used textbooks, electronics, and gear within your university community.</p>
+                
+                <div class="flex flex-wrap justify-center gap-4 text-sm font-medium text-white/90">
+                    <span class="px-4 py-1 bg-white/10 rounded-full border border-white/10">📚 500+ Textbooks</span>
+                    <span class="px-4 py-1 bg-white/10 rounded-full border border-white/10">💻 200+ Electronics</span>
+                    <span class="px-4 py-1 bg-white/10 rounded-full border border-white/10">🎓 Verified Students</span>
+                </div>
+            </div>
+            <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none rotate-180">
+                <svg class="relative block w-[calc(100%+1.3px)] h-[50px]" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                    <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="fill-gray-50"></path>
+                </svg>
+            </div>
+        </div>
+
+        <div class="container mx-auto px-4 -mt-6 relative z-20">
+            <div class="bg-white p-2 rounded-2xl shadow-xl shadow-gray-200/50 max-w-3xl mx-auto flex overflow-x-auto no-scrollbar gap-2">
+                <button class="category-btn active flex-1 min-w-[100px] py-2.5 rounded-xl font-semibold text-sm transition-all text-center whitespace-nowrap bg-primary text-white" data-category="all">All Items</button>
+                <button class="category-btn flex-1 min-w-[100px] py-2.5 rounded-xl font-semibold text-sm transition-all text-center whitespace-nowrap text-gray-600 hover:bg-gray-50" data-category="textbooks">📚 Textbooks</button>
+                <button class="category-btn flex-1 min-w-[100px] py-2.5 rounded-xl font-semibold text-sm transition-all text-center whitespace-nowrap text-gray-600 hover:bg-gray-50" data-category="electronics">💻 Electronics</button>
+                <button class="category-btn flex-1 min-w-[100px] py-2.5 rounded-xl font-semibold text-sm transition-all text-center whitespace-nowrap text-gray-600 hover:bg-gray-50" data-category="furniture">🛋️ Furniture</button>
+                <button class="category-btn flex-1 min-w-[100px] py-2.5 rounded-xl font-semibold text-sm transition-all text-center whitespace-nowrap text-gray-600 hover:bg-gray-50" data-category="clothing">👕 Clothing</button>
+            </div>
+        </div>
+
+        <div class="container mx-auto px-4 py-12">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl font-bold text-gray-800">Latest Listings</h2>
+                <span id="item-count" class="text-sm font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">Loading...</span>
+            </div>
+            <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                </div>
+            
+            <div id="empty-state" class="hidden text-center py-16">
+                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                    <i class="fas fa-search text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800">No items found</h3>
+                <p class="text-gray-500">Try adjusting your search or category.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="sell-section" class="section">
+        <div class="max-w-2xl mx-auto p-4 py-8">
+            <div class="flex items-center mb-6">
+                <button onclick="navigateTo('home-section')" class="w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:text-primary transition-colors mr-4">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1 class="text-2xl font-bold text-gray-800">Sell an Item</h1>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+                <form id="sell-form" class="p-8 space-y-6">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Item Photo</label>
+                        <div class="relative group cursor-pointer">
+                            <div class="border-2 border-dashed border-gray-300 rounded-2xl p-10 text-center bg-gray-50 group-hover:border-primary group-hover:bg-teal-50 transition-all">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 group-hover:text-primary mb-3"></i>
+                                <p class="text-gray-600 font-medium">Click to upload photo</p>
+                                <p class="text-xs text-gray-400 mt-1">Supports: JPG, PNG</p>
+                            </div>
+                            <input type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Title / ISBN</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="sell-title" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl input-style outline-none" placeholder="e.g. Calculus 8th Edition" required>
+                            <button type="button" onclick="simulateScan()" class="bg-gray-800 text-white px-4 rounded-xl hover:bg-gray-700 transition flex items-center shadow-lg">
+                                <i class="fas fa-barcode mr-2"></i> Scan ISBN
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1 ml-1">Tip: Use 'Scan ISBN' to auto-fill book details.</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Category</label>
+                            <select id="sell-category" class="w-full px-4 py-3 border border-gray-200 rounded-xl input-style outline-none bg-white" required>
+                                <option value="textbooks">Textbooks</option>
+                                <option value="electronics">Electronics</option>
+                                <option value="furniture">Furniture</option>
+                                <option value="clothing">Clothing</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Price ($)</label>
+                            <input type="number" id="sell-price" class="w-full px-4 py-3 border border-gray-200 rounded-xl input-style outline-none" placeholder="0.00" required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Condition</label>
+                        <div class="flex gap-2">
+                            <label class="cursor-pointer flex-1">
+                                <input type="radio" name="condition" value="New" class="peer hidden">
+                                <div class="py-2 text-center rounded-lg border border-gray-200 text-gray-600 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary font-medium transition-all">New</div>
+                            </label>
+                            <label class="cursor-pointer flex-1">
+                                <input type="radio" name="condition" value="Like New" class="peer hidden" checked>
+                                <div class="py-2 text-center rounded-lg border border-gray-200 text-gray-600 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary font-medium transition-all">Like New</div>
+                            </label>
+                            <label class="cursor-pointer flex-1">
+                                <input type="radio" name="condition" value="Used" class="peer hidden">
+                                <div class="py-2 text-center rounded-lg border border-gray-200 text-gray-600 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary font-medium transition-all">Used</div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Description</label>
+                        <textarea id="sell-desc" rows="3" class="w-full px-4 py-3 border border-gray-200 rounded-xl input-style outline-none resize-none" placeholder="Describe the item..."></textarea>
+                    </div>
+
+                    <div class="flex gap-4 pt-2">
+                        <button type="button" onclick="navigateTo('home-section')" class="flex-1 py-3 text-gray-600 font-bold hover:bg-gray-100 rounded-xl transition">Cancel</button>
+                        <button type="submit" class="flex-1 py-3 btn-primary text-white font-bold rounded-xl shadow-lg shadow-teal-500/30">Publish Item</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section id="chat-section" class="section">
+        <div class="h-screen flex flex-col bg-white">
+            <header class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0">
+                <div class="flex items-center space-x-3">
+                    <button onclick="navigateTo('home-section')" class="w-10 h-10 hover:bg-gray-100 rounded-full flex items-center justify-center transition">
+                        <i class="fas fa-arrow-left text-gray-600"></i>
+                    </button>
+                    <div class="flex items-center space-x-3">
+                         <div class="relative">
+                            <img src="https://ui-avatars.com/api/?name=Alex+M&background=random" class="w-10 h-10 rounded-full">
+                            <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                         </div>
+                         <div>
+                             <h3 class="font-bold text-gray-800 leading-none">Alex M.</h3>
+                             <p class="text-xs text-gray-500">Replying to: Calculus Book</p>
+                         </div>
+                    </div>
+                </div>
+                <button class="text-gray-400 hover:text-primary"><i class="fas fa-ellipsis-v"></i></button>
+            </header>
+
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                </div>
+
+            <div class="p-4 border-t border-gray-200 bg-white">
+                <form onsubmit="sendMessage(event)" class="flex gap-2">
+                    <button type="button" class="w-10 h-10 text-gray-400 hover:text-primary rounded-full flex items-center justify-center"><i class="fas fa-paperclip"></i></button>
+                    <input type="text" id="chat-input" class="flex-1 bg-gray-100 border-0 rounded-full px-5 focus:ring-2 focus:ring-primary outline-none" placeholder="Type a message...">
+                    <button type="submit" class="w-10 h-10 btn-primary text-white rounded-full flex items-center justify-center shadow-md"><i class="fas fa-paper-plane"></i></button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <div id="profile-modal" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="toggleProfileModal()"></div>
+        <div class="absolute right-0 top-0 h-full w-80 bg-white shadow-2xl p-6 flex flex-col animation-slide-in">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-xl font-bold">My Profile</h2>
+                <button onclick="toggleProfileModal()" class="text-gray-400 hover:text-gray-800"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="text-center mb-8">
+                <img id="profile-img-modal" src="" class="w-20 h-20 rounded-full mx-auto mb-3 shadow-md">
+                <h3 id="profile-name-modal" class="text-lg font-bold">Student Name</h3>
+                <p class="text-sm text-gray-500">UE Germany Student</p>
+            </div>
+
+            <div class="space-y-2">
+                <button class="w-full text-left px-4 py-3 rounded-xl bg-gray-50 hover:bg-teal-50 hover:text-teal-700 font-medium transition flex items-center">
+                    <i class="fas fa-box-open w-8"></i> My Listings <span class="ml-auto bg-gray-200 text-gray-600 text-xs px-2 py-0.5 rounded-full">2</span>
+                </button>
+                <button class="w-full text-left px-4 py-3 rounded-xl bg-gray-50 hover:bg-teal-50 hover:text-teal-700 font-medium transition flex items-center">
+                    <i class="fas fa-heart w-8"></i> Wishlist
+                </button>
+                <button class="w-full text-left px-4 py-3 rounded-xl bg-gray-50 hover:bg-teal-50 hover:text-teal-700 font-medium transition flex items-center">
+                    <i class="fas fa-cog w-8"></i> Settings
+                </button>
+            </div>
+
+            <div class="mt-auto">
+                <button onclick="logout()" class="w-full py-3 text-red-500 font-bold hover:bg-red-50 rounded-xl transition">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Log Out
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed top-5 right-5 bg-white text-gray-800 px-6 py-4 rounded-xl shadow-2xl z-[70] transform translate-x-[200%] transition-all duration-300 border-l-4 border-green-500 flex items-center">
+        <div class="w-8 h-8 bg-green-100 text-green-500 rounded-full flex items-center justify-center mr-3">
+            <i class="fas fa-check"></i>
+        </div>
+        <div>
+            <h4 class="font-bold text-sm">Success</h4>
+            <p id="toast-message" class="text-sm text-gray-500">Operation successful</p>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA & STATE ---
+        // LocalStorage'dan al yoksa default listeyi kullan. Resim linkleri sabitlendi (kırılmaz).
+        let products = JSON.parse(localStorage.getItem('uni_products')) || [
+            { id: 1, title: "Calculus 8th Edition", price: 45, category: "textbooks", seller: "Onur K.", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=500&q=60" },
+            { id: 2, title: "Dell Monitor 24inch", price: 80, category: "electronics", seller: "Ege O.", img: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=500&q=60" },
+            { id: 3, title: "IKEA Desk Lamp", price: 15, category: "furniture", seller: "Esila A.", img: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=500&q=60" },
+            { id: 4, title: "Lab Coat (Size M)", price: 10, category: "clothing", seller: "Mert C.", img: "https://images.unsplash.com/photo-1584634731339-252c581abfc5?auto=format&fit=crop&w=500&q=60" },
+            { id: 5, title: "Sony Headphones", price: 120, category: "electronics", seller: "Emre Y.", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=500&q=60" },
+            { id: 6, title: "Modern Chair", price: 35, category: "furniture", seller: "Selin A.", img: "https://images.unsplash.com/photo-1592078615290-033ee584e267?auto=format&fit=crop&w=500&q=60" }
+        ];
+
+        let currentUser = localStorage.getItem('uni_user') || null;
+
+        // --- INIT ---
+        window.onload = () => {
+            if (currentUser) {
+                updateUserUI(currentUser);
+                navigateTo('home-section');
+            } else {
+                navigateTo('auth-section');
+            }
+            renderProducts();
+        };
+
+        // --- NAVIGATION ---
+        function navigateTo(sectionId) {
+            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        // --- AUTH LOGIC ---
+        const loginForm = document.getElementById('login-form-element');
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const name = email.split('@')[0];
+            completeAuth(name, 'Welcome back!');
+        });
+
+        const registerForm = document.getElementById('register-form-element');
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('register-name').value;
+            completeAuth(name, 'Account created successfully!');
+        });
+
+        function completeAuth(name, msg) {
+            currentUser = name;
+            localStorage.setItem('uni_user', name);
+            updateUserUI(name);
+            showToast(msg);
+            navigateTo('home-section');
+        }
+
+        function logout() {
+            localStorage.removeItem('uni_user');
+            currentUser = null;
+            toggleProfileModal(); // Close modal if open
+            navigateTo('auth-section');
+            showToast('Logged out');
+        }
+
+        function updateUserUI(name) {
+            document.getElementById('nav-user-name').innerText = name;
+            const avatarUrl = `https://ui-avatars.com/api/?name=${name}&background=0d9488&color=fff`;
+            document.getElementById('nav-user-img').src = avatarUrl;
+            document.getElementById('profile-name-modal').innerText = name;
+            document.getElementById('profile-img-modal').src = avatarUrl;
+        }
+
+        // --- AUTH TOGGLE UI ---
+        document.getElementById('show-register').onclick = (e) => {
+            e.preventDefault();
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('register-form').classList.remove('hidden');
+        };
+        document.getElementById('show-login').onclick = (e) => {
+            e.preventDefault();
+            document.getElementById('register-form').classList.add('hidden');
+            document.getElementById('login-form').classList.remove('hidden');
+        };
+
+        // --- PRODUCTS LOGIC ---
+        function renderProducts(category = 'all', search = '') {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = '';
+            
+            const filtered = products.filter(p => {
+                const catMatch = category === 'all' || p.category === category;
+                const searchMatch = p.title.toLowerCase().includes(search.toLowerCase());
+                return catMatch && searchMatch;
+            });
+
+            document.getElementById('item-count').innerText = `${filtered.length} items found`;
+            
+            if (filtered.length === 0) {
+                document.getElementById('empty-state').classList.remove('hidden');
+            } else {
+                document.getElementById('empty-state').classList.add('hidden');
+                filtered.forEach(p => {
+                    grid.innerHTML += `
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden card-hover group">
+                            <div class="relative h-48 overflow-hidden">
+                                <img src="${p.img}" onerror="this.src='https://placehold.co/600x400?text=No+Image'" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                                <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-bold uppercase text-gray-700">${p.category}</span>
+                                <button onclick="toggleHeart(this)" class="absolute top-3 right-3 w-8 h-8 bg-white/50 backdrop-blur-sm hover:bg-white rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition group-active:scale-95">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-bold text-gray-800 truncate pr-2">${p.title}</h3>
+                                    <span class="text-primary font-bold">$${p.price}</span>
+                                </div>
+                                <p class="text-xs text-gray-400 mb-4 flex items-center">
+                                    <i class="fas fa-user-circle mr-1"></i> Posted by ${p.seller}
+                                </p>
+                                <button onclick="navigateTo('chat-section')" class="w-full py-2.5 bg-gray-50 hover:bg-teal-50 text-gray-700 hover:text-primary font-bold rounded-xl border border-gray-100 transition-colors">
+                                    Message Seller
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        // --- CATEGORY & SEARCH ---
+        const catBtns = document.querySelectorAll('.category-btn');
+        catBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                catBtns.forEach(b => {
+                    b.classList.remove('bg-primary', 'text-white');
+                    b.classList.add('text-gray-600', 'hover:bg-gray-50');
+                });
+                btn.classList.remove('text-gray-600', 'hover:bg-gray-50');
+                btn.classList.add('bg-primary', 'text-white');
+                
+                const cat = btn.dataset.category;
+                const search = document.getElementById('search-input').value;
+                renderProducts(cat, search);
+            });
+        });
+
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            const activeBtn = document.querySelector('.category-btn.bg-primary');
+            const cat = activeBtn ? activeBtn.dataset.category : 'all';
+            renderProducts(cat, e.target.value);
+        });
+
+        // --- SELL ITEM & FAKE SCANNING ---
+        document.getElementById('sell-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const title = document.getElementById('sell-title').value;
+            const price = document.getElementById('sell-price').value;
+            const cat = document.getElementById('sell-category').value;
+            
+            // Yeni ürünü listeye ekle
+            products.unshift({
+                id: Date.now(),
+                title: title,
+                price: price,
+                category: cat,
+                seller: currentUser,
+                img: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=500&q=60' // Default image
+            });
+            
+            // LocalStorage'ı güncelle (Kalıcılık için)
+            localStorage.setItem('uni_products', JSON.stringify(products));
+
+            showToast('Item published successfully!');
+            navigateTo('home-section');
+            renderProducts();
+            e.target.reset();
+        });
+
+        // 1. Fake Barkod Tarama Simülasyonu
+        function simulateScan() {
+            const btn = document.querySelector('button[onclick="simulateScan()"]');
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Scanning...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                document.getElementById('sell-title').value = "Introduction to Java Programming";
+                document.getElementById('sell-category').value = "textbooks";
+                document.getElementById('sell-price').value = "55";
+                document.getElementById('sell-desc').value = "Scanned ISBN: 978-0134685992. 10th Edition. Condition detected as Good.";
+                
+                showToast('ISBN Found! Details auto-filled.');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 1500); 
+        }
+
+        // 2. Favoriye Ekleme Animasyonu
+        function toggleHeart(btn) {
+            const icon = btn.querySelector('i');
+            if (icon.classList.contains('far')) {
+                icon.classList.remove('far');
+                icon.classList.add('fas', 'text-red-500');
+                btn.classList.add('scale-125');
+                setTimeout(() => btn.classList.remove('scale-125'), 200);
+                showToast('Added to Wishlist');
+            } else {
+                icon.classList.remove('fas', 'text-red-500');
+                icon.classList.add('far');
+                showToast('Removed from Wishlist');
+            }
+        }
+
+        // --- CHAT SYSTEM ---
+        const messages = [
+            { text: "Hi, is this still available?", type: "sent", time: "10:30 AM" },
+            { text: "Yes! When can you meet?", type: "received", time: "10:32 AM" },
+        ];
+
+        function renderChat() {
+            const container = document.getElementById('chat-messages');
+            container.innerHTML = messages.map(m => `
+                <div class="flex ${m.type === 'sent' ? 'justify-end' : 'justify-start'}">
+                    <div class="${m.type === 'sent' ? 'chat-bubble-right' : 'chat-bubble-left'} px-4 py-2 max-w-xs shadow-sm">
+                        <p class="text-sm">${m.text}</p>
+                        <span class="text-[10px] ${m.type === 'sent' ? 'text-teal-100' : 'text-gray-400'} block text-right mt-1">${m.time}</span>
+                    </div>
+                </div>
+            `).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sendMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            if (!input.value.trim()) return;
+            
+            messages.push({ text: input.value, type: 'sent', time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
+            renderChat();
+            input.value = '';
+
+            // Fake reply
+            setTimeout(() => {
+                messages.push({ text: "Perfect, see you at the library!", type: 'received', time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
+                renderChat();
+                showToast('New message received');
+            }, 1500);
+        }
+        
+        // Init Chat
+        renderChat();
+
+        // --- TOAST & MODAL ---
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = msg;
+            toast.classList.remove('translate-x-[200%]');
+            setTimeout(() => toast.classList.add('translate-x-[200%]'), 3000);
+        }
+
+        function toggleProfileModal() {
+            const modal = document.getElementById('profile-modal');
+            modal.classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>
