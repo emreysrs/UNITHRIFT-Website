@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%2314b8a6' d='M137.4 40.3c-4.2-7.3-11.8-11.5-20-11.5H29.2c-16.8 0-28 17.4-20.7 32.5l88.4 182.3c4.2 8.6 13 14 22.4 14h165.6c8.8 0 16-7.2 16-16s-7.2-16-16-16H135.2L46.8 60.8h69.7l39.2 67.7c4.4 7.7 14.2 10.3 21.9 5.9s10.3-14.2 5.9-21.9L137.4 40.3zm199.1 0c-8.8 0-16 7.2-16 16s7.2 16 16 16h116.7l-88.4 182.3h-69.7l-39.2-67.7c-4.4-7.7-14.2-10.3-21.9-5.9s-10.3 14.2-5.9 21.9l46.2 79.9c4.2 7.3 11.8 11.5 20 11.5h103.4c16.8 0 28-17.4 20.7-32.5l-88.4-182.3c-4.2-8.6-13-14-22.4-14H336.5zm-143.9 245.7c-4.2-7.3-11.8-11.5-20-11.5H69.2c-16.8 0-28 17.4-20.7 32.5l88.4 182.3c4.2 8.6 13 14 22.4 14h165.6c8.8 0 16-7.2 16-16s-7.2-16-16-16H135.2l-88.4-182.3h69.7l39.2 67.7c4.4 7.7 14.2 10.3 21.9 5.9s10.3-14.2 5.9-21.9L192.6 286z'/%3E%3C/svg%3E">
+    <title>UNI THRIFT - Student Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0d9488',
+                        'primary-dark': '#0f766e',
+                        'primary-light': '#14b8a6',
+                        secondary: '#f0fdfa',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
+        .section { display: none; min-height: 100vh; animation: fadeIn 0.4s ease-out; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .gradient-bg { background: linear-gradient(135deg, #0d9488 0%, #115e59 100%); }
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+        
+        .input-style { transition: all 0.2s; }
+        .input-style:focus { border-color: #0d9488; box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1); }
+        
+        .btn-primary { background: #0d9488; transition: all 0.2s; }
+        .btn-primary:hover { background: #0f766e; transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(0); }
+
+        /* Chat Bubbles */
+        .chat-bubble-left { background: #f3f4f6; border-radius: 18px 18px 18px 4px; }
+        .chat-bubble-right { background: #0d9488; border-radius: 18px 18px 4px 18px; color: white; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Hide scrollbar for category buttons on mobile */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Mobile Bottom Navigation */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 8px 0;
+            padding-bottom: env(safe-area-inset-bottom, 8px);
+            z-index: 50;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+        }
+
+        @media (max-width: 768px) {
+            .mobile-nav { display: flex; }
+            .desktop-nav { display: none !important; }
+            body { padding-bottom: 80px; }
+            
+            /* Adjust toast position for mobile */
+            #toast { 
+                left: 16px; 
+                right: 16px; 
+                top: auto;
+                bottom: 100px;
+                transform: translateY(200%) !important;
+            }
+            #toast.show { transform: translateY(0) !important; }
+
+            /* Profile modal full width on mobile */
+            #profile-modal > div:last-child {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            /* Chat section height adjustment */
+            #chat-section .h-screen {
+                height: calc(100vh - 80px);
+            }
+        }
+
+        /* Touch-friendly buttons */
+        @media (hover: none) {
+            .card-hover:active { 
+                transform: scale(0.98); 
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            }
+            .btn-primary:active {
+                transform: scale(0.95);
+            }
+        }
+
+        /* Safe area for notched phones */
+        @supports (padding: max(0px)) {
+            .mobile-nav {
+                padding-bottom: max(8px, env(safe-area-inset-bottom));
+            }
+        }
+
+        /* Slide animation for modal */
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        .animation-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        /* Payment Card Styles */
+        .credit-card-preview {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            border-radius: 16px;
+            padding: 20px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 1.586;
+            max-width: 340px;
+        }
+        
+        .credit-card-preview::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        
+        .card-chip {
+            width: 40px;
+            height: 30px;
+            background: linear-gradient(135deg, #ffd700 0%, #daa520 100%);
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        
+        /* OTP Input Styles */
+        .otp-input {
+            width: 45px;
+            height: 55px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .otp-input:focus {
+            border-color: #0d9488;
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
+            outline: none;
+        }
+        
+        /* Password Strength Indicator */
+        .strength-bar {
+            height: 4px;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+        
+        .strength-weak { background: #ef4444; width: 33%; }
+        .strength-medium { background: #f59e0b; width: 66%; }
+        .strength-strong { background: #10b981; width: 100%; }
+        
+        /* Secure Badge Pulse */
+        .secure-pulse {
+            animation: securePulse 2s infinite;
+        }
+        
+        @keyframes securePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        }
+        
+        /* Modal Animation */
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .modal-animate {
+            animation: modalFadeIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Forgot Password Modal -->
+    <div id="forgot-password-modal" class="fixed inset-0 bg-black/50 z-[80] hidden items-center justify-center p-4" style="display: none;">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 modal-animate">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-lock text-teal-600 text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">Forgot Password?</h2>
+                <p class="text-gray-500 mt-2 text-sm">Enter your student email and ID to reset your password.</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Student Email</label>
+                    <div class="relative">
+                        <input type="email" id="forgot-email" placeholder="your.name@university.edu"
+                            class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl input-style outline-none">
+                        <i class="fas fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Student ID</label>
+                    <div class="relative">
+                        <input type="text" id="forgot-student-id" placeholder="e.g., STU2024001"
+                            class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl input-style outline-none">
+                        <i class="fas fa-id-card absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <button onclick="sendResetLink()" class="w-full py-3 btn-primary text-white rounded-xl font-bold shadow-lg shadow-teal-500/30 flex items-center justify-center gap-2">
+                    <i class="fas fa-paper-plane"></i>
+                    Send Reset Link
+                </button>
+                
+                <button onclick="closeForgotPassword()" class="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition">
+                    Back to Login
+                </button>
+            </div>
+            
+            <div class="mt-6 p-4 bg-blue-50 rounded-xl">
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                    <div class="text-sm text-blue-700">
+                        <p class="font-medium">Need help?</p>
+                        <p>Contact IT Support at support@university.edu</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3D Secure Payment Modal -->
+    <div id="secure-3d-modal" class="fixed inset-0 bg-black/50 z-[80] hidden items-center justify-center p-4" style="display: none;">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 modal-animate">
+            <div class="text-center mb-6">
+                <div class="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4 secure-pulse">
+                    <i class="fas fa-shield-alt text-white text-3xl"></i>
+                </div>
+                <h2 class="text-xl font-bold text-gray-800">3D Secure Verification</h2>
+                <p class="text-gray-500 mt-2 text-sm">Enter the 6-digit code sent to your phone</p>
+            </div>
+            
+            <div class="flex items-center justify-center gap-4 mb-4">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/200px-MasterCard_Logo.svg.png" alt="Mastercard" class="h-8">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/200px-Visa_Inc._logo.svg.png" alt="Visa" class="h-6">
+            </div>
+            
+            <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-500">Card ending in</span>
+                    <span class="font-mono font-bold" id="secure-card-last4">**** 4242</span>
+                </div>
+                <div class="flex items-center justify-between text-sm mt-2">
+                    <span class="text-gray-500">Amount</span>
+                    <span class="font-bold text-primary" id="secure-amount">$47.50</span>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-3 text-center">Enter OTP Code</label>
+                <div class="flex justify-center gap-2" id="otp-container">
+                    <input type="text" maxlength="1" class="otp-input" oninput="handleOTPInput(this, 0)">
+                    <input type="text" maxlength="1" class="otp-input" oninput="handleOTPInput(this, 1)">
+                    <input type="text" maxlength="1" class="otp-input" oninput="handleOTPInput(this, 2)">
+                    <input type="text" maxlength="1" class="otp-input" oninput="handleOTPInput(this, 3)">
+                    <input type="text" maxlength="1" class="otp-input" oninput="handleOTPInput(this, 4)">
+                    <input type="text" maxlength="1" class="otp-input" oninput="handleOTPInput(this, 5)">
+                </div>
+                <p class="text-center text-xs text-gray-500 mt-3">
+                    <i class="fas fa-mobile-alt mr-1"></i>
+                    Code sent to +90 *** *** 45 67
+                </p>
+            </div>
+            
+            <button onclick="verify3DSecure()" id="verify-otp-btn" class="w-full py-3 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-xl font-bold shadow-lg flex items-center justify-center gap-2 hover:from-green-700 hover:to-green-600 transition">
+                <i class="fas fa-check-circle"></i>
+                Verify & Pay
+            </button>
+            
+            <div class="flex items-center justify-between mt-4">
+                <button onclick="resendOTP()" class="text-primary text-sm hover:underline">
+                    <i class="fas fa-redo mr-1"></i> Resend Code
+                </button>
+                <button onclick="close3DSecure()" class="text-gray-500 text-sm hover:underline">
+                    Cancel
+                </button>
+            </div>
+            
+            <div class="mt-6 flex items-center justify-center gap-4 text-xs text-gray-400">
+                <div class="flex items-center gap-1">
+                    <i class="fas fa-lock"></i>
+                    <span>256-bit SSL</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>3D Secure 2.0</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <i class="fas fa-check-circle"></i>
+                    <span>PCI DSS</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Success Modal -->
+    <div id="payment-success-modal" class="fixed inset-0 bg-black/50 z-[80] hidden items-center justify-center p-4" style="display: none;">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 text-center modal-animate">
+            <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-check text-green-500 text-5xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Payment Successful!</h2>
+            <p class="text-gray-500 mb-6">Your order has been confirmed.</p>
+            
+            <div class="bg-gray-50 rounded-xl p-4 mb-6 text-left">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-gray-500">Order ID</span>
+                    <span class="font-mono font-bold">#UNI-<span id="success-order-id">78432</span></span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-500">Amount Paid</span>
+                    <span class="font-bold text-green-600" id="success-amount">$47.50</span>
+                </div>
+            </div>
+            
+            <button onclick="closePaymentSuccess()" class="w-full py-3 btn-primary text-white rounded-xl font-bold shadow-lg shadow-teal-500/30">
+                Continue Shopping
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav justify-around items-center">
+        <button onclick="navigateTo('home-section')" class="mobile-nav-btn flex flex-col items-center justify-center px-4 py-2 text-gray-500 hover:text-primary transition-colors" data-section="home-section">
+            <i class="fas fa-home text-xl"></i>
+            <span class="text-[10px] font-medium mt-1">Home</span>
+        </button>
+        <button onclick="navigateTo('chat-section')" class="mobile-nav-btn flex flex-col items-center justify-center px-4 py-2 text-gray-500 hover:text-primary transition-colors relative" data-section="chat-section">
+            <i class="fas fa-comment-dots text-xl"></i>
+            <span class="absolute top-1 right-2 w-4 h-4 bg-red-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center">2</span>
+            <span class="text-[10px] font-medium mt-1">Chat</span>
+        </button>
+        <button onclick="navigateTo('sell-section')" class="flex flex-col items-center justify-center px-4 py-2 -mt-6">
+            <div class="w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-teal-500/30 text-white">
+                <i class="fas fa-plus text-xl"></i>
+            </div>
+            <span class="text-[10px] font-medium mt-1 text-primary">Sell</span>
+        </button>
+        <button onclick="showMobileSearch()" class="mobile-nav-btn flex flex-col items-center justify-center px-4 py-2 text-gray-500 hover:text-primary transition-colors">
+            <i class="fas fa-search text-xl"></i>
+            <span class="text-[10px] font-medium mt-1">Search</span>
+        </button>
+        <button onclick="toggleProfileModal()" class="mobile-nav-btn flex flex-col items-center justify-center px-4 py-2 text-gray-500 hover:text-primary transition-colors">
+            <i class="fas fa-user text-xl"></i>
+            <span class="text-[10px] font-medium mt-1">Profile</span>
+        </button>
+    </nav>
+
+    <!-- Mobile Search Overlay -->
+    <div id="mobile-search-overlay" class="fixed inset-0 bg-white z-[55] hidden">
+        <div class="p-4">
+            <div class="flex items-center gap-3 mb-4">
+                <button onclick="hideMobileSearch()" class="w-10 h-10 flex items-center justify-center text-gray-600">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+                <div class="flex-1 relative">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" id="mobile-search-input" class="w-full pl-11 pr-4 py-3 bg-gray-100 border-0 rounded-xl outline-none focus:ring-2 focus:ring-primary" placeholder="Search items..." autofocus>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1.5 bg-gray-100 rounded-full text-sm text-gray-600">📚 Textbooks</span>
+                <span class="px-3 py-1.5 bg-gray-100 rounded-full text-sm text-gray-600">💻 Electronics</span>
+                <span class="px-3 py-1.5 bg-gray-100 rounded-full text-sm text-gray-600">🛋️ Furniture</span>
+            </div>
+        </div>
+    </div>
+
+    <section id="auth-section" class="section active">
+        <div class="min-h-screen gradient-bg flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col md:flex-row md:h-[600px]">
+                <div class="hidden md:flex w-1/2 bg-gray-100 items-center justify-center relative overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-90">
+                    <div class="absolute inset-0 bg-teal-900/40 mix-blend-multiply"></div>
+                    <div class="relative z-10 text-center text-white p-8">
+                        <i class="fas fa-recycle text-6xl mb-4"></i>
+                        <h2 class="text-3xl font-bold mb-2">UNI THRIFT</h2>
+                        <p class="text-white/90">The sustainable marketplace for students.</p>
+                    </div>
+                </div>
+
+                <!-- Mobile Header -->
+                <div class="md:hidden bg-teal-900 p-6 text-center">
+                    <i class="fas fa-recycle text-4xl text-white mb-2"></i>
+                    <h2 class="text-2xl font-bold text-white">UNI THRIFT</h2>
+                    <p class="text-white/80 text-sm">The sustainable marketplace for students</p>
+                </div>
+
+                <div class="w-full md:w-1/2 p-6 md:p-12 flex flex-col justify-center relative">
+                    <div id="login-form" class="transition-all duration-300">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Welcome Back!</h2>
+                        <p class="text-gray-500 mb-6 md:mb-8 text-sm md:text-base">Login to continue to the marketplace.</p>
+                        <form id="login-form-element" class="space-y-4 md:space-y-5">
+                            <div>
+                                <label class="text-sm font-semibold text-gray-700">Email</label>
+                                <input type="email" id="login-email" class="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl input-style outline-none text-sm md:text-base" placeholder="student@university.edu" required>
+                            </div>
+                            <div>
+                                <label class="text-sm font-semibold text-gray-700">Password</label>
+                                <div class="relative">
+                                    <input type="password" id="login-password" class="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl input-style outline-none text-sm md:text-base pr-12" placeholder="••••••••" required>
+                                    <button type="button" onclick="togglePasswordVisibility('login-password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 mt-0.5">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label class="flex items-center text-sm text-gray-600">
+                                    <input type="checkbox" class="w-4 h-4 text-primary border-gray-300 rounded mr-2">
+                                    Remember me
+                                </label>
+                                <button type="button" onclick="openForgotPassword()" class="text-sm text-primary font-semibold hover:underline">Forgot password?</button>
+                            </div>
+                            <button type="submit" class="w-full py-3 md:py-3.5 btn-primary text-white font-bold rounded-xl shadow-lg shadow-teal-500/30 text-sm md:text-base">Sign In</button>
+                        </form>
+                        <p class="text-center text-gray-600 mt-4 md:mt-6 text-sm md:text-base">New here? <a href="#" id="show-register" class="text-primary font-bold hover:underline">Create an account</a></p>
+                    </div>
+
+                    <div id="register-form" class="hidden transition-all duration-300">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Join UniThrift</h2>
+                        <p class="text-gray-500 mb-6 md:mb-8 text-sm md:text-base">Start buying and selling on campus today.</p>
+                        <form id="register-form-element" class="space-y-4 md:space-y-5">
+                            <div>
+                                <label class="text-sm font-semibold text-gray-700">Full Name</label>
+                                <input type="text" id="register-name" class="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl input-style outline-none text-sm md:text-base" placeholder="e.g. Emre Yasar" required>
+                            </div>
+                            <div>
+                                <label class="text-sm font-semibold text-gray-700">Student ID</label>
+                                <div class="relative">
+                                    <input type="text" id="register-student-id" class="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl input-style outline-none text-sm md:text-base pl-10" placeholder="e.g. STU2024001" required>
+                                    <i class="fas fa-id-card absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 mt-0.5"></i>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1"><i class="fas fa-info-circle mr-1"></i>Your university student ID number</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-semibold text-gray-700">Email</label>
+                                <input type="email" id="register-email" class="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl input-style outline-none text-sm md:text-base" placeholder="student@university.edu" required>
+                            </div>
+                            <div>
+                                <label class="text-sm font-semibold text-gray-700">Password</label>
+                                <div class="relative">
+                                    <input type="password" id="register-password" class="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl input-style outline-none text-sm md:text-base pr-12" placeholder="Create a password" required oninput="checkPasswordStrength()">
+                                    <button type="button" onclick="togglePasswordVisibility('register-password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 mt-0.5">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="mt-2">
+                                    <div class="h-1 bg-gray-200 rounded-full overflow-hidden">
+                                        <div id="password-strength-bar" class="strength-bar h-full" style="width: 0%"></div>
+                                    </div>
+                                    <p id="password-strength-text" class="text-xs mt-1 text-gray-500">Password strength</p>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-sm font-semibold text-gray-700">Confirm Password</label>
+                                <div class="relative">
+                                    <input type="password" id="register-confirm-password" class="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl input-style outline-none text-sm md:text-base pr-12" placeholder="Confirm your password" required oninput="checkPasswordMatch()">
+                                    <span id="password-match-icon" class="absolute right-3 top-1/2 -translate-y-1/2 mt-0.5 hidden">
+                                        <i class="fas fa-check-circle text-green-500"></i>
+                                    </span>
+                                </div>
+                                <p id="password-match-text" class="text-xs mt-1"></p>
+                            </div>
+                            <div class="flex items-start">
+                                <input type="checkbox" id="terms-checkbox" class="w-4 h-4 text-primary border-gray-300 rounded mt-0.5 mr-2" required>
+                                <label class="text-sm text-gray-600">I agree to the <a href="#" class="text-primary hover:underline">Terms of Service</a> and <a href="#" class="text-primary hover:underline">Privacy Policy</a></label>
+                            </div>
+                            <button type="submit" class="w-full py-3 md:py-3.5 btn-primary text-white font-bold rounded-xl shadow-lg shadow-teal-500/30 text-sm md:text-base">Create Account</button>
+                        </form>
+                        <p class="text-center text-gray-600 mt-4 md:mt-6 text-sm md:text-base">Already have an account? <a href="#" id="show-login" class="text-primary font-bold hover:underline">Sign In</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="home-section" class="section">
+        <nav class="desktop-nav bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
+            <div class="container mx-auto px-4">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center space-x-2 cursor-pointer" onclick="navigateTo('home-section')">
+                        <div class="w-9 h-9 bg-primary text-white rounded-lg flex items-center justify-center shadow-lg shadow-teal-500/30">
+                            <i class="fas fa-recycle text-lg"></i>
+                        </div>
+                        <span class="text-xl font-bold text-gray-800 tracking-tight">UNI THRIFT</span>
+                    </div>
+
+                    <div class="hidden md:flex flex-1 max-w-lg mx-8">
+                        <div class="relative w-full group">
+                            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors"></i>
+                            <input type="text" id="search-input" class="w-full pl-11 pr-4 py-2.5 bg-gray-100 border-transparent focus:bg-white border focus:border-primary rounded-full outline-none transition-all" placeholder="Search textbooks, furniture...">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <button onclick="navigateTo('chat-section')" class="relative text-gray-500 hover:text-primary transition-colors">
+                            <i class="fas fa-comment-dots text-xl"></i>
+                            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">2</span>
+                        </button>
+                        
+                        <div class="flex items-center space-x-2 cursor-pointer border-l pl-4 border-gray-200" onclick="toggleProfileModal()">
+                            <div class="text-right hidden sm:block">
+                                <p id="nav-user-name" class="text-sm font-bold text-gray-800 leading-none">Student</p>
+                                <p class="text-[10px] text-green-500 font-bold uppercase tracking-wider">Online</p>
+                            </div>
+                            <img id="nav-user-img" src="https://ui-avatars.com/api/?name=Student&background=0d9488&color=fff" class="w-9 h-9 rounded-full ring-2 ring-white shadow-sm">
+                        </div>
+
+                        <button onclick="navigateTo('sell-section')" class="hidden sm:flex items-center px-5 py-2 btn-primary text-white rounded-full font-bold text-sm shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40 transition-all">
+                            <i class="fas fa-plus mr-2"></i> Sell Item
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="relative bg-teal-900 overflow-hidden">
+            <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+            <div class="container mx-auto px-4 py-10 md:py-16 relative z-10 text-center">
+                <h1 class="text-2xl sm:text-3xl md:text-5xl font-extrabold text-white mb-3 md:mb-4 tracking-tight">Find What You Need on Campus</h1>
+                <p class="text-teal-100 text-sm md:text-lg mb-6 md:mb-8 max-w-2xl mx-auto px-4">The safest way to buy and sell used textbooks, electronics, and gear within your university community.</p>
+                
+                <div class="flex flex-wrap justify-center gap-2 md:gap-4 text-xs md:text-sm font-medium text-white/90">
+                    <span class="px-3 md:px-4 py-1 bg-white/10 rounded-full border border-white/10">📚 500+ Textbooks</span>
+                    <span class="px-3 md:px-4 py-1 bg-white/10 rounded-full border border-white/10">💻 200+ Electronics</span>
+                    <span class="px-3 md:px-4 py-1 bg-white/10 rounded-full border border-white/10 hidden sm:inline-flex">🎓 Verified Students</span>
+                </div>
+            </div>
+            <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none rotate-180">
+                <svg class="relative block w-[calc(100%+1.3px)] h-[50px]" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                    <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="fill-gray-50"></path>
+                </svg>
+            </div>
+        </div>
+
+        <div class="container mx-auto px-4 -mt-6 relative z-20">
+            <div class="bg-white p-2 rounded-2xl shadow-xl shadow-gray-200/50 max-w-3xl mx-auto flex overflow-x-auto no-scrollbar gap-2">
+                <button class="category-btn active flex-shrink-0 min-w-[80px] md:min-w-[100px] py-2 md:py-2.5 rounded-xl font-semibold text-xs md:text-sm transition-all text-center whitespace-nowrap bg-primary text-white" data-category="all">All Items</button>
+                <button class="category-btn flex-shrink-0 min-w-[80px] md:min-w-[100px] py-2 md:py-2.5 rounded-xl font-semibold text-xs md:text-sm transition-all text-center whitespace-nowrap text-gray-600 hover:bg-gray-50" data-category="textbooks">📚 Textbooks</button>
+                <button class="category-btn flex-shrink-0 min-w-[80px] md:min-w-[100px] py-2 md:py-2.5 rounded-xl font-semibold text-xs md:text-sm transition-all text-center whitespace-nowrap text-gray-600 hover:bg-gray-50" data-category="electronics">💻 Electronics</button>
+                <button class="category-btn flex-shrink-0 min-w-[80px] md:min-w-[100px] py-2 md:py-2.5 rounded-xl font-semibold text-xs md:text-sm transition-all text-center whitespace-nowrap text-gray-600 hover:bg-gray-50" data-category="furniture">🛋️ Furniture</button>
+                <button class="category-btn flex-shrink-0 min-w-[80px] md:min-w-[100px] py-2 md:py-2.5 rounded-xl font-semibold text-xs md:text-sm transition-all text-center whitespace-nowrap text-gray-600 hover:bg-gray-50" data-category="clothing">👕 Clothing</button>
+            </div>
+        </div>
+
+        <div class="container mx-auto px-4 py-8 md:py-12">
+            <div class="flex items-center justify-between mb-6 md:mb-8">
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800">Latest Listings</h2>
+                <span id="item-count" class="text-xs md:text-sm font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">Loading...</span>
+            </div>
+            <div id="products-grid" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
+                </div>
+            
+            <div id="empty-state" class="hidden text-center py-16">
+                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                    <i class="fas fa-search text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800">No items found</h3>
+                <p class="text-gray-500">Try adjusting your search or category.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="sell-section" class="section">
+        <div class="max-w-2xl mx-auto p-4 py-6 md:py-8">
+            <div class="flex items-center mb-4 md:mb-6">
+                <button onclick="navigateTo('home-section')" class="w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:text-primary transition-colors mr-3 md:mr-4">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1 class="text-xl md:text-2xl font-bold text-gray-800">Sell an Item</h1>
+            </div>
+
+            <div class="bg-white rounded-2xl md:rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+                <form id="sell-form" class="p-4 md:p-8 space-y-4 md:space-y-6">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Item Photo</label>
+                        <div class="relative group cursor-pointer">
+                            <div class="border-2 border-dashed border-gray-300 rounded-xl md:rounded-2xl p-6 md:p-10 text-center bg-gray-50 group-hover:border-primary group-hover:bg-teal-50 transition-all">
+                                <i class="fas fa-cloud-upload-alt text-3xl md:text-4xl text-gray-400 group-hover:text-primary mb-2 md:mb-3"></i>
+                                <p class="text-gray-600 font-medium text-sm md:text-base">Click to upload photo</p>
+                                <p class="text-xs text-gray-400 mt-1">Supports: JPG, PNG</p>
+                            </div>
+                            <input type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Title / ISBN</label>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="text" id="sell-title" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl input-style outline-none text-sm md:text-base" placeholder="e.g. Calculus 8th Edition" required>
+                            <button type="button" onclick="simulateScan()" class="bg-gray-800 text-white px-4 py-3 rounded-xl hover:bg-gray-700 transition flex items-center justify-center shadow-lg text-sm">
+                                <i class="fas fa-barcode mr-2"></i> Scan ISBN
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1 ml-1">Tip: Use 'Scan ISBN' to auto-fill book details.</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 md:gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Category</label>
+                            <select id="sell-category" class="w-full px-3 md:px-4 py-3 border border-gray-200 rounded-xl input-style outline-none bg-white text-sm md:text-base" required>
+                                <option value="textbooks">Textbooks</option>
+                                <option value="electronics">Electronics</option>
+                                <option value="furniture">Furniture</option>
+                                <option value="clothing">Clothing</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Price ($)</label>
+                            <input type="number" id="sell-price" class="w-full px-3 md:px-4 py-3 border border-gray-200 rounded-xl input-style outline-none text-sm md:text-base" placeholder="0.00" required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Condition</label>
+                        <div class="flex gap-2">
+                            <label class="cursor-pointer flex-1">
+                                <input type="radio" name="condition" value="New" class="peer hidden">
+                                <div class="py-2 text-center rounded-lg border border-gray-200 text-gray-600 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary font-medium transition-all text-xs md:text-sm">New</div>
+                            </label>
+                            <label class="cursor-pointer flex-1">
+                                <input type="radio" name="condition" value="Like New" class="peer hidden" checked>
+                                <div class="py-2 text-center rounded-lg border border-gray-200 text-gray-600 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary font-medium transition-all text-xs md:text-sm">Like New</div>
+                            </label>
+                            <label class="cursor-pointer flex-1">
+                                <input type="radio" name="condition" value="Used" class="peer hidden">
+                                <div class="py-2 text-center rounded-lg border border-gray-200 text-gray-600 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary font-medium transition-all text-xs md:text-sm">Used</div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Description</label>
+                        <textarea id="sell-desc" rows="3" class="w-full px-4 py-3 border border-gray-200 rounded-xl input-style outline-none resize-none text-sm md:text-base" placeholder="Describe the item..."></textarea>
+                    </div>
+
+                    <div class="flex gap-3 md:gap-4 pt-2">
+                        <button type="button" onclick="navigateTo('home-section')" class="flex-1 py-3 text-gray-600 font-bold hover:bg-gray-100 rounded-xl transition text-sm md:text-base">Cancel</button>
+                        <button type="submit" class="flex-1 py-3 btn-primary text-white font-bold rounded-xl shadow-lg shadow-teal-500/30 text-sm md:text-base">Publish Item</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section id="chat-section" class="section">
+        <div class="h-screen md:h-screen flex flex-col bg-white" style="height: calc(100vh - 80px); height: calc(100dvh - 80px);">
+            <header class="bg-white border-b border-gray-200 px-3 md:px-4 py-3 flex items-center justify-between sticky top-0">
+                <div class="flex items-center space-x-2 md:space-x-3">
+                    <button onclick="navigateTo('home-section')" class="w-9 h-9 md:w-10 md:h-10 hover:bg-gray-100 rounded-full flex items-center justify-center transition">
+                        <i class="fas fa-arrow-left text-gray-600"></i>
+                    </button>
+                    <div class="flex items-center space-x-2 md:space-x-3">
+                         <div class="relative">
+                            <img src="https://ui-avatars.com/api/?name=Alex+M&background=random" class="w-9 h-9 md:w-10 md:h-10 rounded-full">
+                            <span class="absolute bottom-0 right-0 w-2.5 h-2.5 md:w-3 md:h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                         </div>
+                         <div>
+                             <h3 class="font-bold text-gray-800 leading-none text-sm md:text-base">Alex M.</h3>
+                             <p class="text-[10px] md:text-xs text-gray-500">Replying to: Calculus Book</p>
+                         </div>
+                    </div>
+                </div>
+                <button class="text-gray-400 hover:text-primary p-2"><i class="fas fa-ellipsis-v"></i></button>
+            </header>
+
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4 bg-gray-50">
+                </div>
+
+            <div class="p-3 md:p-4 border-t border-gray-200 bg-white">
+                <form onsubmit="sendMessage(event)" class="flex gap-2">
+                    <button type="button" class="w-9 h-9 md:w-10 md:h-10 text-gray-400 hover:text-primary rounded-full flex items-center justify-center flex-shrink-0"><i class="fas fa-paperclip"></i></button>
+                    <input type="text" id="chat-input" class="flex-1 bg-gray-100 border-0 rounded-full px-4 md:px-5 py-2.5 focus:ring-2 focus:ring-primary outline-none text-sm md:text-base" placeholder="Type a message...">
+                    <button type="submit" class="w-9 h-9 md:w-10 md:h-10 btn-primary text-white rounded-full flex items-center justify-center shadow-md flex-shrink-0"><i class="fas fa-paper-plane text-sm"></i></button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Payment Section -->
+    <section id="payment-section" class="section">
+        <div class="max-w-4xl mx-auto p-4 py-6 md:py-8">
+            <div class="flex items-center mb-4 md:mb-6">
+                <button onclick="navigateTo('home-section')" class="w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:text-primary transition-colors mr-3 md:mr-4">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1 class="text-xl md:text-2xl font-bold text-gray-800">Checkout</h1>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Order Summary -->
+                <div class="bg-white rounded-2xl shadow-xl p-4 md:p-6 order-2 md:order-1">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-shopping-bag text-primary"></i>
+                        Order Summary
+                    </h2>
+                    
+                    <div id="payment-item-details" class="border-b border-gray-200 pb-4 mb-4">
+                        <div class="flex gap-4">
+                            <img id="payment-item-image" src="" alt="Item" class="w-20 h-20 object-cover rounded-xl">
+                            <div class="flex-1">
+                                <h3 id="payment-item-title" class="font-semibold text-gray-800 text-sm md:text-base">Item Title</h3>
+                                <p id="payment-item-seller" class="text-xs text-gray-500">Seller: Name</p>
+                                <p class="text-xs text-primary mt-1">Condition: Like New</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Item Price</span>
+                            <span id="payment-subtotal" class="font-medium">$0.00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Service Fee</span>
+                            <span class="font-medium">$2.50</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Campus Delivery</span>
+                            <span class="font-medium text-green-600">Free</span>
+                        </div>
+                        <div class="border-t border-gray-200 pt-3 flex justify-between">
+                            <span class="font-bold text-gray-800">Total</span>
+                            <span id="payment-total" class="font-bold text-xl text-primary">$0.00</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Security Badges -->
+                    <div class="mt-6 p-4 bg-green-50 rounded-xl">
+                        <div class="flex items-center gap-2 text-green-700 mb-2">
+                            <i class="fas fa-shield-alt"></i>
+                            <span class="font-semibold text-sm">Buyer Protection</span>
+                        </div>
+                        <p class="text-xs text-green-600">Your payment is protected. Full refund if item isn't as described.</p>
+                    </div>
+                </div>
+
+                <!-- Payment Form -->
+                <div class="bg-white rounded-2xl shadow-xl p-4 md:p-6 order-1 md:order-2">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-credit-card text-primary"></i>
+                        Payment Details
+                    </h2>
+                    
+                    <!-- Card Preview -->
+                    <div class="credit-card-preview mb-6 mx-auto" id="card-preview">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="card-chip"></div>
+                            <div id="card-brand-logo">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/200px-Visa_Inc._logo.svg.png" alt="Visa" class="h-6 opacity-80">
+                            </div>
+                        </div>
+                        <div class="font-mono text-lg tracking-widest mb-4" id="card-number-preview">•••• •••• •••• ••••</div>
+                        <div class="flex justify-between text-sm">
+                            <div>
+                                <p class="text-gray-400 text-[10px] uppercase">Card Holder</p>
+                                <p id="card-holder-preview" class="font-medium text-sm">YOUR NAME</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400 text-[10px] uppercase">Expires</p>
+                                <p id="card-expiry-preview" class="font-medium text-sm">MM/YY</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card Selection -->
+                    <div class="flex gap-3 mb-6">
+                        <button onclick="selectCardType('visa')" class="card-type-btn flex-1 p-3 border-2 border-primary rounded-xl bg-primary/5 flex items-center justify-center">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/200px-Visa_Inc._logo.svg.png" alt="Visa" class="h-6">
+                        </button>
+                        <button onclick="selectCardType('mastercard')" class="card-type-btn flex-1 p-3 border-2 border-gray-200 rounded-xl hover:border-primary transition flex items-center justify-center">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/200px-MasterCard_Logo.svg.png" alt="Mastercard" class="h-8">
+                        </button>
+                        <button onclick="selectCardType('amex')" class="card-type-btn flex-1 p-3 border-2 border-gray-200 rounded-xl hover:border-primary transition flex items-center justify-center">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/American_Express_logo_%282018%29.svg/200px-American_Express_logo_%282018%29.svg.png" alt="Amex" class="h-6">
+                        </button>
+                    </div>
+                    
+                    <form id="payment-form" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Card Number</label>
+                            <div class="relative">
+                                <input type="text" id="card-number" maxlength="19" class="w-full px-4 py-3 border border-gray-200 rounded-xl input-style outline-none text-sm md:text-base pl-12" placeholder="1234 5678 9012 3456" oninput="formatCardNumber(this)">
+                                <i class="fas fa-credit-card absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Card Holder Name</label>
+                            <input type="text" id="card-holder" class="w-full px-4 py-3 border border-gray-200 rounded-xl input-style outline-none text-sm md:text-base uppercase" placeholder="JOHN DOE" oninput="updateCardPreview()">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Expiry Date</label>
+                                <input type="text" id="card-expiry" maxlength="5" class="w-full px-4 py-3 border border-gray-200 rounded-xl input-style outline-none text-sm md:text-base" placeholder="MM/YY" oninput="formatExpiry(this)">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">CVV</label>
+                                <div class="relative">
+                                    <input type="password" id="card-cvv" maxlength="4" class="w-full px-4 py-3 border border-gray-200 rounded-xl input-style outline-none text-sm md:text-base" placeholder="•••">
+                                    <i class="fas fa-question-circle absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-help" title="3 or 4 digit security code on back of card"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 3D Secure Notice -->
+                        <div class="flex items-center gap-3 p-4 bg-blue-50 rounded-xl">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-shield-alt text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-blue-800">3D Secure Payment</p>
+                                <p class="text-xs text-blue-600">You will receive an OTP to verify your payment</p>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="w-full py-3.5 btn-primary text-white font-bold rounded-xl shadow-lg shadow-teal-500/30 text-sm md:text-base flex items-center justify-center gap-2">
+                            <i class="fas fa-lock mr-1"></i>
+                            Pay Securely <span id="pay-btn-amount">$0.00</span>
+                        </button>
+                    </form>
+                    
+                    <!-- Trust Badges -->
+                    <div class="mt-6 flex items-center justify-center gap-6 text-xs text-gray-400">
+                        <div class="flex items-center gap-1">
+                            <i class="fas fa-lock"></i>
+                            <span>SSL Encrypted</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>3D Secure</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <i class="fas fa-check-circle"></i>
+                            <span>PCI Compliant</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="profile-modal" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="toggleProfileModal()"></div>
+        <div class="absolute right-0 top-0 h-full w-80 bg-white shadow-2xl p-6 flex flex-col animation-slide-in">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-xl font-bold">My Profile</h2>
+                <button onclick="toggleProfileModal()" class="text-gray-400 hover:text-gray-800"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="text-center mb-8">
+                <img id="profile-img-modal" src="" class="w-20 h-20 rounded-full mx-auto mb-3 shadow-md">
+                <h3 id="profile-name-modal" class="text-lg font-bold">Student Name</h3>
+                <p class="text-sm text-gray-500">UE Germany Student</p>
+            </div>
+
+            <div class="space-y-2">
+                <button class="w-full text-left px-4 py-3 rounded-xl bg-gray-50 hover:bg-teal-50 hover:text-teal-700 font-medium transition flex items-center">
+                    <i class="fas fa-box-open w-8"></i> My Listings <span class="ml-auto bg-gray-200 text-gray-600 text-xs px-2 py-0.5 rounded-full">2</span>
+                </button>
+                <button class="w-full text-left px-4 py-3 rounded-xl bg-gray-50 hover:bg-teal-50 hover:text-teal-700 font-medium transition flex items-center">
+                    <i class="fas fa-heart w-8"></i> Wishlist
+                </button>
+                <button class="w-full text-left px-4 py-3 rounded-xl bg-gray-50 hover:bg-teal-50 hover:text-teal-700 font-medium transition flex items-center">
+                    <i class="fas fa-cog w-8"></i> Settings
+                </button>
+            </div>
+
+            <div class="mt-auto">
+                <button onclick="logout()" class="w-full py-3 text-red-500 font-bold hover:bg-red-50 rounded-xl transition">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Log Out
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed top-5 right-5 bg-white text-gray-800 px-6 py-4 rounded-xl shadow-2xl z-[70] transform translate-x-[200%] transition-all duration-300 border-l-4 border-green-500 flex items-center">
+        <div class="w-8 h-8 bg-green-100 text-green-500 rounded-full flex items-center justify-center mr-3">
+            <i class="fas fa-check"></i>
+        </div>
+        <div>
+            <h4 class="font-bold text-sm">Success</h4>
+            <p id="toast-message" class="text-sm text-gray-500">Operation successful</p>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA & STATE ---
+        // LocalStorage'dan al yoksa default listeyi kullan. Resim linkleri sabitlendi (kırılmaz).
+        let products = JSON.parse(localStorage.getItem('uni_products')) || [
+            { id: 1, title: "Calculus 8th Edition", price: 45, category: "textbooks", seller: "Onur K.", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=500&q=60" },
+            { id: 2, title: "Dell Monitor 24inch", price: 80, category: "electronics", seller: "Ege O.", img: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=500&q=60" },
+            { id: 3, title: "IKEA Desk Lamp", price: 15, category: "furniture", seller: "Esila A.", img: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=500&q=60" },
+            { id: 4, title: "Lab Coat (Size M)", price: 10, category: "clothing", seller: "Mert C.", img: "https://images.unsplash.com/photo-1584634731339-252c581abfc5?auto=format&fit=crop&w=500&q=60" },
+            { id: 5, title: "Sony Headphones", price: 120, category: "electronics", seller: "Emre Y.", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=500&q=60" },
+            { id: 6, title: "Modern Chair", price: 35, category: "furniture", seller: "Selin A.", img: "https://images.unsplash.com/photo-1592078615290-033ee584e267?auto=format&fit=crop&w=500&q=60" }
+        ];
+
+        let currentUser = localStorage.getItem('uni_user') || null;
+
+        // --- INIT ---
+        window.onload = () => {
+            if (currentUser) {
+                updateUserUI(currentUser);
+                navigateTo('home-section');
+            } else {
+                navigateTo('auth-section');
+            }
+            renderProducts();
+        };
+
+        // --- NAVIGATION ---
+        function navigateTo(sectionId) {
+            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        // --- AUTH LOGIC ---
+        const loginForm = document.getElementById('login-form-element');
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const name = email.split('@')[0];
+            completeAuth(name, 'Welcome back!');
+        });
+
+        const registerForm = document.getElementById('register-form-element');
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('register-name').value;
+            const studentId = document.getElementById('register-student-id').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            
+            if (!studentId) {
+                showToast('Please enter your Student ID', 'error');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showToast('Passwords do not match!', 'error');
+                return;
+            }
+            
+            if (!document.getElementById('terms-checkbox').checked) {
+                showToast('Please agree to Terms of Service', 'error');
+                return;
+            }
+            
+            // Store student ID
+            localStorage.setItem('uni_student_id', studentId);
+            completeAuth(name, 'Account created successfully!');
+        });
+
+        function completeAuth(name, msg) {
+            currentUser = name;
+            localStorage.setItem('uni_user', name);
+            updateUserUI(name);
+            showToast(msg);
+            navigateTo('home-section');
+        }
+
+        function logout() {
+            localStorage.removeItem('uni_user');
+            currentUser = null;
+            toggleProfileModal(); // Close modal if open
+            navigateTo('auth-section');
+            showToast('Logged out');
+        }
+
+        function updateUserUI(name) {
+            document.getElementById('nav-user-name').innerText = name;
+            const avatarUrl = `https://ui-avatars.com/api/?name=${name}&background=0d9488&color=fff`;
+            document.getElementById('nav-user-img').src = avatarUrl;
+            document.getElementById('profile-name-modal').innerText = name;
+            document.getElementById('profile-img-modal').src = avatarUrl;
+        }
+
+        // --- AUTH TOGGLE UI ---
+        document.getElementById('show-register').onclick = (e) => {
+            e.preventDefault();
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('register-form').classList.remove('hidden');
+        };
+        document.getElementById('show-login').onclick = (e) => {
+            e.preventDefault();
+            document.getElementById('register-form').classList.add('hidden');
+            document.getElementById('login-form').classList.remove('hidden');
+        };
+
+        // --- PRODUCTS LOGIC ---
+        function renderProducts(category = 'all', search = '') {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = '';
+            
+            const filtered = products.filter(p => {
+                const catMatch = category === 'all' || p.category === category;
+                const searchMatch = p.title.toLowerCase().includes(search.toLowerCase());
+                return catMatch && searchMatch;
+            });
+
+            document.getElementById('item-count').innerText = `${filtered.length} items found`;
+            
+            if (filtered.length === 0) {
+                document.getElementById('empty-state').classList.remove('hidden');
+            } else {
+                document.getElementById('empty-state').classList.add('hidden');
+                filtered.forEach(p => {
+                    grid.innerHTML += `
+                        <div class="bg-white rounded-xl md:rounded-2xl shadow-sm border border-gray-100 overflow-hidden card-hover group">
+                            <div class="relative h-32 sm:h-40 md:h-48 overflow-hidden">
+                                <img src="${p.img}" onerror="this.src='https://placehold.co/600x400?text=No+Image'" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                                <span class="absolute top-2 left-2 md:top-3 md:left-3 bg-white/90 backdrop-blur-sm px-2 py-0.5 md:py-1 rounded-md text-[10px] md:text-xs font-bold uppercase text-gray-700">${p.category}</span>
+                                <button onclick="toggleHeart(this)" class="absolute top-2 right-2 md:top-3 md:right-3 w-7 h-7 md:w-8 md:h-8 bg-white/50 backdrop-blur-sm hover:bg-white rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition group-active:scale-95">
+                                    <i class="far fa-heart text-sm md:text-base"></i>
+                                </button>
+                            </div>
+                            <div class="p-3 md:p-4">
+                                <div class="flex justify-between items-start mb-1 md:mb-2">
+                                    <h3 class="font-bold text-gray-800 truncate pr-2 text-sm md:text-base">${p.title}</h3>
+                                    <span class="text-primary font-bold text-sm md:text-base flex-shrink-0">$${p.price}</span>
+                                </div>
+                                <p class="text-[10px] md:text-xs text-gray-400 mb-2 md:mb-4 flex items-center">
+                                    <i class="fas fa-user-circle mr-1"></i> ${p.seller}
+                                </p>
+                                <div class="flex gap-2">
+                                    <button onclick="navigateTo('chat-section')" class="flex-1 py-2 md:py-2.5 bg-gray-50 hover:bg-teal-50 text-gray-700 hover:text-primary font-bold rounded-lg md:rounded-xl border border-gray-100 transition-colors text-xs md:text-sm">
+                                        <i class="fas fa-comment-dots mr-1"></i> Chat
+                                    </button>
+                                    <button onclick="openPayment(${p.id}, '${p.title}', ${p.price}, '${p.seller}', '${p.img}')" class="flex-1 py-2 md:py-2.5 btn-primary text-white font-bold rounded-lg md:rounded-xl shadow-md text-xs md:text-sm">
+                                        <i class="fas fa-shopping-cart mr-1"></i> Buy
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        // --- CATEGORY & SEARCH ---
+        const catBtns = document.querySelectorAll('.category-btn');
+        catBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                catBtns.forEach(b => {
+                    b.classList.remove('bg-primary', 'text-white');
+                    b.classList.add('text-gray-600', 'hover:bg-gray-50');
+                });
+                btn.classList.remove('text-gray-600', 'hover:bg-gray-50');
+                btn.classList.add('bg-primary', 'text-white');
+                
+                const cat = btn.dataset.category;
+                const search = document.getElementById('search-input').value;
+                renderProducts(cat, search);
+            });
+        });
+
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            const activeBtn = document.querySelector('.category-btn.bg-primary');
+            const cat = activeBtn ? activeBtn.dataset.category : 'all';
+            renderProducts(cat, e.target.value);
+        });
+
+        // --- SELL ITEM & FAKE SCANNING ---
+        document.getElementById('sell-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const title = document.getElementById('sell-title').value;
+            const price = document.getElementById('sell-price').value;
+            const cat = document.getElementById('sell-category').value;
+            
+            // Yeni ürünü listeye ekle
+            products.unshift({
+                id: Date.now(),
+                title: title,
+                price: price,
+                category: cat,
+                seller: currentUser,
+                img: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=500&q=60' // Default image
+            });
+            
+            // LocalStorage'ı güncelle (Kalıcılık için)
+            localStorage.setItem('uni_products', JSON.stringify(products));
+
+            showToast('Item published successfully!');
+            navigateTo('home-section');
+            renderProducts();
+            e.target.reset();
+        });
+
+        // 1. Fake Barkod Tarama Simülasyonu
+        function simulateScan() {
+            const btn = document.querySelector('button[onclick="simulateScan()"]');
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Scanning...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                document.getElementById('sell-title').value = "Introduction to Java Programming";
+                document.getElementById('sell-category').value = "textbooks";
+                document.getElementById('sell-price').value = "55";
+                document.getElementById('sell-desc').value = "Scanned ISBN: 978-0134685992. 10th Edition. Condition detected as Good.";
+                
+                showToast('ISBN Found! Details auto-filled.');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 1500); 
+        }
+
+        // 2. Favoriye Ekleme Animasyonu
+        function toggleHeart(btn) {
+            const icon = btn.querySelector('i');
+            if (icon.classList.contains('far')) {
+                icon.classList.remove('far');
+                icon.classList.add('fas', 'text-red-500');
+                btn.classList.add('scale-125');
+                setTimeout(() => btn.classList.remove('scale-125'), 200);
+                showToast('Added to Wishlist');
+            } else {
+                icon.classList.remove('fas', 'text-red-500');
+                icon.classList.add('far');
+                showToast('Removed from Wishlist');
+            }
+        }
+
+        // --- CHAT SYSTEM ---
+        const messages = [
+            { text: "Hi, is this still available?", type: "sent", time: "10:30 AM" },
+            { text: "Yes! When can you meet?", type: "received", time: "10:32 AM" },
+        ];
+
+        function renderChat() {
+            const container = document.getElementById('chat-messages');
+            container.innerHTML = messages.map(m => `
+                <div class="flex ${m.type === 'sent' ? 'justify-end' : 'justify-start'}">
+                    <div class="${m.type === 'sent' ? 'chat-bubble-right' : 'chat-bubble-left'} px-4 py-2 max-w-xs shadow-sm">
+                        <p class="text-sm">${m.text}</p>
+                        <span class="text-[10px] ${m.type === 'sent' ? 'text-teal-100' : 'text-gray-400'} block text-right mt-1">${m.time}</span>
+                    </div>
+                </div>
+            `).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sendMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            if (!input.value.trim()) return;
+            
+            messages.push({ text: input.value, type: 'sent', time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
+            renderChat();
+            input.value = '';
+
+            // Fake reply
+            setTimeout(() => {
+                messages.push({ text: "Perfect, see you at the library!", type: 'received', time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
+                renderChat();
+                showToast('New message received');
+            }, 1500);
+        }
+        
+        // Init Chat
+        renderChat();
+
+        // --- TOAST & MODAL ---
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = msg;
+            toast.classList.remove('translate-x-[200%]');
+            setTimeout(() => toast.classList.add('translate-x-[200%]'), 3000);
+        }
+
+        function toggleProfileModal() {
+            const modal = document.getElementById('profile-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        // Mobile Search Functions
+        function showMobileSearch() {
+            document.getElementById('mobile-search-overlay').classList.remove('hidden');
+            document.getElementById('mobile-search-input').focus();
+        }
+
+        function hideMobileSearch() {
+            document.getElementById('mobile-search-overlay').classList.add('hidden');
+        }
+
+        // Mobile search input handler
+        document.getElementById('mobile-search-input').addEventListener('input', (e) => {
+            const activeBtn = document.querySelector('.category-btn.bg-primary');
+            const cat = activeBtn ? activeBtn.dataset.category : 'all';
+            renderProducts(cat, e.target.value);
+            hideMobileSearch();
+            navigateTo('home-section');
+        });
+
+        // Update mobile nav active state
+        function updateMobileNavActive(sectionId) {
+            document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+                btn.classList.remove('text-primary');
+                btn.classList.add('text-gray-500');
+                if (btn.dataset.section === sectionId) {
+                    btn.classList.add('text-primary');
+                    btn.classList.remove('text-gray-500');
+                }
+            });
+        }
+
+        // Override navigateTo to update mobile nav
+        const originalNavigateTo = navigateTo;
+        navigateTo = function(sectionId) {
+            originalNavigateTo(sectionId);
+            updateMobileNavActive(sectionId);
+        };
+
+        // --- PASSWORD FUNCTIONS ---
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = input.parentElement.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+        
+        function checkPasswordStrength() {
+            const password = document.getElementById('register-password').value;
+            const bar = document.getElementById('password-strength-bar');
+            const text = document.getElementById('password-strength-text');
+            
+            let strength = 0;
+            if (password.length >= 6) strength++;
+            if (password.length >= 8) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            
+            bar.className = 'strength-bar h-full';
+            if (strength <= 2) {
+                bar.classList.add('strength-weak');
+                text.textContent = 'Weak password';
+                text.className = 'text-xs mt-1 text-red-500';
+            } else if (strength <= 3) {
+                bar.classList.add('strength-medium');
+                text.textContent = 'Medium password';
+                text.className = 'text-xs mt-1 text-yellow-500';
+            } else {
+                bar.classList.add('strength-strong');
+                text.textContent = 'Strong password';
+                text.className = 'text-xs mt-1 text-green-500';
+            }
+        }
+        
+        function checkPasswordMatch() {
+            const password = document.getElementById('register-password').value;
+            const confirm = document.getElementById('register-confirm-password').value;
+            const icon = document.getElementById('password-match-icon');
+            const text = document.getElementById('password-match-text');
+            
+            if (confirm.length === 0) {
+                icon.classList.add('hidden');
+                text.textContent = '';
+                return;
+            }
+            
+            if (password === confirm) {
+                icon.classList.remove('hidden');
+                icon.innerHTML = '<i class="fas fa-check-circle text-green-500"></i>';
+                text.textContent = 'Passwords match!';
+                text.className = 'text-xs mt-1 text-green-500';
+            } else {
+                icon.classList.remove('hidden');
+                icon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
+                text.textContent = 'Passwords do not match';
+                text.className = 'text-xs mt-1 text-red-500';
+            }
+        }
+
+        // --- FORGOT PASSWORD ---
+        function openForgotPassword() {
+            const modal = document.getElementById('forgot-password-modal');
+            modal.style.display = 'flex';
+        }
+        
+        function closeForgotPassword() {
+            const modal = document.getElementById('forgot-password-modal');
+            modal.style.display = 'none';
+        }
+        
+        function sendResetLink() {
+            const email = document.getElementById('forgot-email').value;
+            const studentId = document.getElementById('forgot-student-id').value;
+            
+            if (!email || !studentId) {
+                showToast('Please fill all fields', 'error');
+                return;
+            }
+            
+            showToast('Password reset link sent to your email!');
+            closeForgotPassword();
+        }
+
+        // --- PAYMENT FUNCTIONS ---
+        let currentPaymentItem = null;
+        
+        function openPayment(id, title, price, seller, img) {
+            currentPaymentItem = { id, title, price, seller, img };
+            
+            document.getElementById('payment-item-image').src = img;
+            document.getElementById('payment-item-title').textContent = title;
+            document.getElementById('payment-item-seller').textContent = 'Seller: ' + seller;
+            document.getElementById('payment-subtotal').textContent = '$' + price.toFixed(2);
+            
+            const total = price + 2.50;
+            document.getElementById('payment-total').textContent = '$' + total.toFixed(2);
+            document.getElementById('pay-btn-amount').textContent = '$' + total.toFixed(2);
+            document.getElementById('secure-amount').textContent = '$' + total.toFixed(2);
+            
+            navigateTo('payment-section');
+        }
+        
+        function selectCardType(type) {
+            document.querySelectorAll('.card-type-btn').forEach(btn => {
+                btn.classList.remove('border-primary', 'bg-primary/5');
+                btn.classList.add('border-gray-200');
+            });
+            event.currentTarget.classList.add('border-primary', 'bg-primary/5');
+            event.currentTarget.classList.remove('border-gray-200');
+            
+            const logo = document.getElementById('card-brand-logo');
+            if (type === 'visa') {
+                logo.innerHTML = '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/200px-Visa_Inc._logo.svg.png" alt="Visa" class="h-6 opacity-80">';
+            } else if (type === 'mastercard') {
+                logo.innerHTML = '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/200px-MasterCard_Logo.svg.png" alt="Mastercard" class="h-8 opacity-80">';
+            } else {
+                logo.innerHTML = '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/American_Express_logo_%282018%29.svg/200px-American_Express_logo_%282018%29.svg.png" alt="Amex" class="h-6 opacity-80">';
+            }
+        }
+        
+        function formatCardNumber(input) {
+            let value = input.value.replace(/\s/g, '').replace(/\D/g, '');
+            let formatted = value.match(/.{1,4}/g)?.join(' ') || value;
+            input.value = formatted.substring(0, 19);
+            
+            document.getElementById('card-number-preview').textContent = formatted || '•••• •••• •••• ••••';
+            
+            // Update last 4 for 3D secure
+            if (value.length >= 4) {
+                document.getElementById('secure-card-last4').textContent = '**** ' + value.slice(-4);
+            }
+        }
+        
+        function formatExpiry(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            input.value = value;
+            document.getElementById('card-expiry-preview').textContent = value || 'MM/YY';
+        }
+        
+        function updateCardPreview() {
+            const holder = document.getElementById('card-holder').value;
+            document.getElementById('card-holder-preview').textContent = holder.toUpperCase() || 'YOUR NAME';
+        }
+        
+        // Payment form submission
+        document.getElementById('payment-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const cardNumber = document.getElementById('card-number').value;
+            const cardHolder = document.getElementById('card-holder').value;
+            const expiry = document.getElementById('card-expiry').value;
+            const cvv = document.getElementById('card-cvv').value;
+            
+            if (!cardNumber || !cardHolder || !expiry || !cvv) {
+                showToast('Please fill all card details', 'error');
+                return;
+            }
+            
+            // Show 3D Secure modal
+            open3DSecure();
+        });
+        
+        function open3DSecure() {
+            const modal = document.getElementById('secure-3d-modal');
+            modal.style.display = 'flex';
+            
+            // Focus first OTP input
+            setTimeout(() => {
+                document.querySelector('.otp-input')?.focus();
+            }, 300);
+        }
+        
+        function close3DSecure() {
+            const modal = document.getElementById('secure-3d-modal');
+            modal.style.display = 'none';
+            
+            // Clear OTP inputs
+            document.querySelectorAll('.otp-input').forEach(input => input.value = '');
+        }
+        
+        function handleOTPInput(input, index) {
+            if (input.value.length === 1 && index < 5) {
+                const inputs = document.querySelectorAll('.otp-input');
+                inputs[index + 1]?.focus();
+            }
+        }
+        
+        function resendOTP() {
+            showToast('New OTP code sent!');
+        }
+        
+        function verify3DSecure() {
+            const inputs = document.querySelectorAll('.otp-input');
+            let otp = '';
+            inputs.forEach(input => otp += input.value);
+            
+            if (otp.length !== 6) {
+                showToast('Please enter complete OTP', 'error');
+                return;
+            }
+            
+            // Show loading
+            const btn = document.getElementById('verify-otp-btn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Verifying...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                close3DSecure();
+                showPaymentSuccess();
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Verify & Pay';
+                btn.disabled = false;
+            }, 2000);
+        }
+        
+        function showPaymentSuccess() {
+            const modal = document.getElementById('payment-success-modal');
+            modal.style.display = 'flex';
+            
+            // Generate random order ID
+            document.getElementById('success-order-id').textContent = Math.floor(10000 + Math.random() * 90000);
+            
+            const total = currentPaymentItem ? currentPaymentItem.price + 2.50 : 0;
+            document.getElementById('success-amount').textContent = '$' + total.toFixed(2);
+        }
+        
+        function closePaymentSuccess() {
+            const modal = document.getElementById('payment-success-modal');
+            modal.style.display = 'none';
+            navigateTo('home-section');
+            showToast('Order placed successfully!');
+        }
+    </script>
+</body>
+</html>
