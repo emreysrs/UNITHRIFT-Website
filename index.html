@@ -1060,6 +1060,7 @@
         let currentUser = localStorage.getItem('uni_user') || null;
         let cart = JSON.parse(localStorage.getItem('uni_cart')) || [];
         let orders = JSON.parse(localStorage.getItem('uni_orders')) || [];
+        let isCartCheckout = false;
 
         // --- INIT ---
         window.onload = () => {
@@ -1481,6 +1482,7 @@
         let currentPaymentItem = null;
         
         function openPayment(id, title, price, seller, img) {
+            isCartCheckout = false; // Single item purchase
             currentPaymentItem = { id, title, price, seller, img };
             
             document.getElementById('payment-item-image').src = img;
@@ -1619,14 +1621,33 @@
             const orderId = 'UNI-' + Math.floor(10000 + Math.random() * 90000);
             document.getElementById('success-order-id').textContent = orderId.replace('UNI-', '');
             
-            const total = currentPaymentItem ? currentPaymentItem.price + 2.50 : 0;
+            let total = 0;
+            let orderItems = [];
+            
+            // Check if this is a cart checkout or single item purchase
+            if (isCartCheckout) {
+                // Calculate cart total
+                const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                total = subtotal + 2.50;
+                orderItems = [...cart];
+                
+                // Clear cart after successful payment
+                cart = [];
+                localStorage.setItem('uni_cart', JSON.stringify(cart));
+                updateCartBadge();
+            } else if (currentPaymentItem) {
+                // Single item purchase
+                total = currentPaymentItem.price + 2.50;
+                orderItems = [{ ...currentPaymentItem, quantity: 1 }];
+            }
+            
             document.getElementById('success-amount').textContent = '$' + total.toFixed(2);
             
             // Add to orders
-            if (currentPaymentItem) {
+            if (orderItems.length > 0) {
                 const order = {
                     id: orderId,
-                    items: [currentPaymentItem],
+                    items: orderItems,
                     total: total,
                     date: new Date().toISOString(),
                     status: 'Processing'
@@ -1634,6 +1655,9 @@
                 orders.push(order);
                 localStorage.setItem('uni_orders', JSON.stringify(orders));
             }
+            
+            // Reset checkout flag
+            isCartCheckout = false;
         }
         
         function closePaymentSuccess() {
@@ -1756,30 +1780,26 @@
         function checkoutCart() {
             if (cart.length === 0) return;
             
-            // Create order from cart
-            const orderId = 'UNI-' + Math.floor(10000 + Math.random() * 90000);
+            // Mark this as a cart checkout
+            isCartCheckout = true;
+            
+            // Calculate total
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             
-            const order = {
-                id: orderId,
-                items: [...cart],
-                total: subtotal,
-                date: new Date().toISOString(),
-                status: 'Completed'
-            };
+            // Set payment info for cart
+            const firstItem = cart[0];
+            document.getElementById('payment-item-image').src = firstItem.img;
+            document.getElementById('payment-item-title').textContent = `${cart.length} item${cart.length > 1 ? 's' : ''} from cart`;
+            document.getElementById('payment-item-seller').textContent = `Total Items: ${cart.reduce((sum, item) => sum + item.quantity, 0)}`;
+            document.getElementById('payment-subtotal').textContent = '$' + subtotal.toFixed(2);
             
-            orders.push(order);
-            localStorage.setItem('uni_orders', JSON.stringify(orders));
+            const total = subtotal + 2.50;
+            document.getElementById('payment-total').textContent = '$' + total.toFixed(2);
+            document.getElementById('pay-btn-amount').textContent = '$' + total.toFixed(2);
+            document.getElementById('secure-amount').textContent = '$' + total.toFixed(2);
             
-            // Clear cart
-            cart = [];
-            localStorage.setItem('uni_cart', JSON.stringify(cart));
-            updateCartBadge();
-            
-            // Show success and navigate to orders
-            showToast('Order placed successfully!');
-            navigateTo('orders-section');
-            renderOrders();
+            // Navigate to payment
+            navigateTo('payment-section');
         }
         
         // --- ORDERS FUNCTIONS ---
