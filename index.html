@@ -362,28 +362,29 @@
 
     <!-- Mobile Bottom Navigation -->
     <nav class="mobile-nav justify-around items-center">
-        <button onclick="navigateTo('home-section')" class="mobile-nav-btn flex flex-col items-center justify-center px-4 py-2 text-gray-500 hover:text-primary transition-colors" data-section="home-section">
+        <button onclick="navigateTo('home-section')" class="mobile-nav-btn flex flex-col items-center justify-center px-3 py-2 text-gray-500 hover:text-primary transition-colors" data-section="home-section">
             <i class="fas fa-home text-xl"></i>
             <span class="text-[10px] font-medium mt-1">Home</span>
         </button>
-        <button onclick="navigateTo('chat-section')" class="mobile-nav-btn flex flex-col items-center justify-center px-4 py-2 text-gray-500 hover:text-primary transition-colors relative" data-section="chat-section">
-            <i class="fas fa-comment-dots text-xl"></i>
-            <span class="absolute top-1 right-2 w-4 h-4 bg-red-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center">2</span>
-            <span class="text-[10px] font-medium mt-1">Chat</span>
+        <button onclick="navigateTo('cart-section')" class="mobile-nav-btn flex flex-col items-center justify-center px-3 py-2 text-gray-500 hover:text-primary transition-colors relative" data-section="cart-section">
+            <i class="fas fa-shopping-cart text-xl"></i>
+            <span id="cart-badge-mobile" class="absolute top-1 right-1 w-4 h-4 bg-primary text-white text-[8px] font-bold rounded-full flex items-center justify-center hidden">0</span>
+            <span class="text-[10px] font-medium mt-1">Cart</span>
         </button>
-        <button onclick="navigateTo('sell-section')" class="flex flex-col items-center justify-center px-4 py-2 -mt-6">
+        <button onclick="navigateTo('sell-section')" class="flex flex-col items-center justify-center px-3 py-2 -mt-6">
             <div class="w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-teal-500/30 text-white">
                 <i class="fas fa-plus text-xl"></i>
             </div>
             <span class="text-[10px] font-medium mt-1 text-primary">Sell</span>
         </button>
-        <button onclick="showMobileSearch()" class="mobile-nav-btn flex flex-col items-center justify-center px-4 py-2 text-gray-500 hover:text-primary transition-colors">
-            <i class="fas fa-search text-xl"></i>
-            <span class="text-[10px] font-medium mt-1">Search</span>
+        <button onclick="navigateTo('chat-section')" class="mobile-nav-btn flex flex-col items-center justify-center px-3 py-2 text-gray-500 hover:text-primary transition-colors relative" data-section="chat-section">
+            <i class="fas fa-comment-dots text-xl"></i>
+            <span class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center">2</span>
+            <span class="text-[10px] font-medium mt-1">Chat</span>
         </button>
-        <button onclick="toggleProfileModal()" class="mobile-nav-btn flex flex-col items-center justify-center px-4 py-2 text-gray-500 hover:text-primary transition-colors">
-            <i class="fas fa-user text-xl"></i>
-            <span class="text-[10px] font-medium mt-1">Profile</span>
+        <button onclick="navigateTo('orders-section')" class="mobile-nav-btn flex flex-col items-center justify-center px-3 py-2 text-gray-500 hover:text-primary transition-colors" data-section="orders-section">
+            <i class="fas fa-box text-xl"></i>
+            <span class="text-[10px] font-medium mt-1">Orders</span>
         </button>
     </nav>
 
@@ -537,6 +538,11 @@
                         <button onclick="navigateTo('chat-section')" class="relative text-gray-500 hover:text-primary transition-colors">
                             <i class="fas fa-comment-dots text-xl"></i>
                             <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">2</span>
+                        </button>
+                        
+                        <button onclick="navigateTo('cart-section')" class="relative text-gray-500 hover:text-primary transition-colors">
+                            <i class="fas fa-shopping-cart text-xl"></i>
+                            <span id="cart-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center hidden">0</span>
                         </button>
                         
                         <div class="flex items-center space-x-2 cursor-pointer border-l pl-4 border-gray-200" onclick="toggleProfileModal()">
@@ -882,6 +888,116 @@
         </div>
     </section>
 
+    <!-- Cart Section -->
+    <section id="cart-section" class="section">
+        <div class="min-h-screen bg-gradient-to-br from-gray-50 to-teal-50/30 pb-8">
+            <div class="sticky top-0 z-40 bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100">
+                <div class="container mx-auto px-4 py-4">
+                    <div class="flex items-center">
+                        <button onclick="navigateTo('home-section')" class="w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:text-primary transition-colors mr-3 md:mr-4">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div>
+                            <h1 class="text-xl md:text-2xl font-bold text-gray-800">Shopping Cart</h1>
+                            <p class="text-xs md:text-sm text-gray-500" id="cart-item-count">0 items</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container mx-auto px-4 py-6 md:py-8">
+                <div class="grid lg:grid-cols-3 gap-6">
+                    <!-- Cart Items -->
+                    <div class="lg:col-span-2">
+                        <div id="cart-items" class="space-y-4">
+                            <!-- Cart items will be rendered here -->
+                        </div>
+                        
+                        <!-- Empty Cart State -->
+                        <div id="empty-cart" class="hidden bg-white rounded-2xl p-8 md:p-12 text-center">
+                            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <i class="fas fa-shopping-cart text-gray-400 text-4xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Your cart is empty</h3>
+                            <p class="text-gray-500 mb-6">Add items to your cart to continue shopping</p>
+                            <button onclick="navigateTo('home-section')" class="px-6 py-3 btn-primary text-white rounded-xl font-bold">
+                                Continue Shopping
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Cart Summary -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 sticky top-24">
+                            <h3 class="text-lg font-bold mb-4">Order Summary</h3>
+                            
+                            <div class="space-y-3 mb-6 pb-6 border-b border-gray-100">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Subtotal</span>
+                                    <span class="font-medium" id="cart-subtotal">$0.00</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Shipping</span>
+                                    <span class="font-medium text-green-600">FREE</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-between mb-6">
+                                <span class="text-lg font-bold">Total</span>
+                                <span class="text-lg font-bold text-primary" id="cart-total">$0.00</span>
+                            </div>
+                            
+                            <button onclick="checkoutCart()" id="checkout-btn" class="w-full py-3 btn-primary text-white rounded-xl font-bold shadow-lg shadow-teal-500/30 mb-3" disabled>
+                                Proceed to Checkout
+                            </button>
+                            
+                            <button onclick="navigateTo('home-section')" class="w-full py-3 text-gray-600 font-bold hover:bg-gray-50 rounded-xl transition">
+                                Continue Shopping
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Orders Section -->
+    <section id="orders-section" class="section">
+        <div class="min-h-screen bg-gradient-to-br from-gray-50 to-teal-50/30 pb-8">
+            <div class="sticky top-0 z-40 bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100">
+                <div class="container mx-auto px-4 py-4">
+                    <div class="flex items-center">
+                        <button onclick="navigateTo('home-section')" class="w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:text-primary transition-colors mr-3 md:mr-4">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div>
+                            <h1 class="text-xl md:text-2xl font-bold text-gray-800">My Orders</h1>
+                            <p class="text-xs md:text-sm text-gray-500" id="orders-count">0 orders</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container mx-auto px-4 py-6 md:py-8">
+                <div id="orders-list" class="space-y-4">
+                    <!-- Orders will be rendered here -->
+                </div>
+                
+                <!-- Empty Orders State -->
+                <div id="empty-orders" class="hidden bg-white rounded-2xl p-8 md:p-12 text-center">
+                    <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-box text-gray-400 text-4xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">No orders yet</h3>
+                    <p class="text-gray-500 mb-6">Start shopping to see your orders here</p>
+                    <button onclick="navigateTo('home-section')" class="px-6 py-3 btn-primary text-white rounded-xl font-bold">
+                        Start Shopping
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <div id="profile-modal" class="fixed inset-0 z-[60] hidden">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="toggleProfileModal()"></div>
         <div class="absolute right-0 top-0 h-full w-80 bg-white shadow-2xl p-6 flex flex-col animation-slide-in">
@@ -897,6 +1013,9 @@
             </div>
 
             <div class="space-y-2">
+                <button onclick="navigateTo('orders-section'); toggleProfileModal();" class="w-full text-left px-4 py-3 rounded-xl bg-gray-50 hover:bg-teal-50 hover:text-teal-700 font-medium transition flex items-center">
+                    <i class="fas fa-box w-8"></i> My Orders
+                </button>
                 <button class="w-full text-left px-4 py-3 rounded-xl bg-gray-50 hover:bg-teal-50 hover:text-teal-700 font-medium transition flex items-center">
                     <i class="fas fa-box-open w-8"></i> My Listings <span class="ml-auto bg-gray-200 text-gray-600 text-xs px-2 py-0.5 rounded-full">2</span>
                 </button>
@@ -939,6 +1058,8 @@
         ];
 
         let currentUser = localStorage.getItem('uni_user') || null;
+        let cart = JSON.parse(localStorage.getItem('uni_cart')) || [];
+        let orders = JSON.parse(localStorage.getItem('uni_orders')) || [];
 
         // --- INIT ---
         window.onload = () => {
@@ -949,6 +1070,7 @@
                 navigateTo('auth-section');
             }
             renderProducts();
+            updateCartBadge();
         };
 
         // --- NAVIGATION ---
@@ -956,6 +1078,13 @@
             document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
             document.getElementById(sectionId).classList.add('active');
             window.scrollTo(0,0);
+            
+            // Render cart or orders when navigating to those sections
+            if (sectionId === 'cart-section') {
+                renderCart();
+            } else if (sectionId === 'orders-section') {
+                renderOrders();
+            }
         }
 
         // --- AUTH LOGIC ---
@@ -1067,8 +1196,8 @@
                                     <i class="fas fa-user-circle mr-1"></i> ${p.seller}
                                 </p>
                                 <div class="flex gap-2">
-                                    <button onclick="navigateTo('chat-section')" class="flex-1 py-2 md:py-2.5 bg-gray-50 hover:bg-teal-50 text-gray-700 hover:text-primary font-bold rounded-lg md:rounded-xl border border-gray-100 transition-colors text-xs md:text-sm">
-                                        <i class="fas fa-comment-dots mr-1"></i> Chat
+                                    <button onclick="addToCart(${p.id})" class="flex-1 py-2 md:py-2.5 bg-gray-50 hover:bg-teal-50 text-gray-700 hover:text-primary font-bold rounded-lg md:rounded-xl border border-gray-100 transition-colors text-xs md:text-sm">
+                                        <i class="fas fa-cart-plus mr-1"></i> Add
                                     </button>
                                     <button onclick="openPayment(${p.id}, '${p.title}', ${p.price}, '${p.seller}', '${p.img}')" class="flex-1 py-2 md:py-2.5 btn-primary text-white font-bold rounded-lg md:rounded-xl shadow-md text-xs md:text-sm">
                                         <i class="fas fa-shopping-cart mr-1"></i> Buy
@@ -1487,17 +1616,239 @@
             modal.style.display = 'flex';
             
             // Generate random order ID
-            document.getElementById('success-order-id').textContent = Math.floor(10000 + Math.random() * 90000);
+            const orderId = 'UNI-' + Math.floor(10000 + Math.random() * 90000);
+            document.getElementById('success-order-id').textContent = orderId.replace('UNI-', '');
             
             const total = currentPaymentItem ? currentPaymentItem.price + 2.50 : 0;
             document.getElementById('success-amount').textContent = '$' + total.toFixed(2);
+            
+            // Add to orders
+            if (currentPaymentItem) {
+                const order = {
+                    id: orderId,
+                    items: [currentPaymentItem],
+                    total: total,
+                    date: new Date().toISOString(),
+                    status: 'Processing'
+                };
+                orders.push(order);
+                localStorage.setItem('uni_orders', JSON.stringify(orders));
+            }
         }
         
         function closePaymentSuccess() {
             const modal = document.getElementById('payment-success-modal');
             modal.style.display = 'none';
-            navigateTo('home-section');
+            navigateTo('orders-section');
+            showToast('Order placed successfully! Check My Orders');
+        }
+
+        // --- CART FUNCTIONS ---
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            // Check if already in cart
+            const existingItem = cart.find(item => item.id === productId);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+            
+            localStorage.setItem('uni_cart', JSON.stringify(cart));
+            updateCartBadge();
+            renderCart();
+            showToast('Added to cart!');
+        }
+        
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            localStorage.setItem('uni_cart', JSON.stringify(cart));
+            updateCartBadge();
+            renderCart();
+            showToast('Removed from cart');
+        }
+        
+        function updateCartQuantity(productId, change) {
+            const item = cart.find(i => i.id === productId);
+            if (!item) return;
+            
+            item.quantity += change;
+            if (item.quantity <= 0) {
+                removeFromCart(productId);
+                return;
+            }
+            
+            localStorage.setItem('uni_cart', JSON.stringify(cart));
+            renderCart();
+        }
+        
+        function updateCartBadge() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cart-badge');
+            const badgeMobile = document.getElementById('cart-badge-mobile');
+            
+            if (totalItems > 0) {
+                badge.textContent = totalItems;
+                badge.classList.remove('hidden');
+                badgeMobile.textContent = totalItems;
+                badgeMobile.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+                badgeMobile.classList.add('hidden');
+            }
+        }
+        
+        function renderCart() {
+            const cartItems = document.getElementById('cart-items');
+            const emptyCart = document.getElementById('empty-cart');
+            const checkoutBtn = document.getElementById('checkout-btn');
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = '';
+                emptyCart.classList.remove('hidden');
+                checkoutBtn.disabled = true;
+                document.getElementById('cart-item-count').textContent = '0 items';
+                document.getElementById('cart-subtotal').textContent = '$0.00';
+                document.getElementById('cart-total').textContent = '$0.00';
+                return;
+            }
+            
+            emptyCart.classList.add('hidden');
+            checkoutBtn.disabled = false;
+            
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            document.getElementById('cart-item-count').textContent = `${cart.length} item${cart.length > 1 ? 's' : ''}`;
+            document.getElementById('cart-subtotal').textContent = '$' + subtotal.toFixed(2);
+            document.getElementById('cart-total').textContent = '$' + subtotal.toFixed(2);
+            
+            cartItems.innerHTML = cart.map(item => `
+                <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex gap-4">
+                    <img src="${item.img}" class="w-20 h-20 md:w-24 md:h-24 rounded-lg object-cover">
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h3 class="font-bold text-gray-800 text-sm md:text-base">${item.title}</h3>
+                                <p class="text-xs text-gray-500">Sold by ${item.seller}</p>
+                            </div>
+                            <button onclick="removeFromCart(${item.id})" class="text-red-500 hover:text-red-700">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-3 bg-gray-100 rounded-lg px-2 py-1">
+                                <button onclick="updateCartQuantity(${item.id}, -1)" class="w-6 h-6 flex items-center justify-center text-gray-600 hover:text-primary">
+                                    <i class="fas fa-minus text-xs"></i>
+                                </button>
+                                <span class="font-bold text-sm w-6 text-center">${item.quantity}</span>
+                                <button onclick="updateCartQuantity(${item.id}, 1)" class="w-6 h-6 flex items-center justify-center text-gray-600 hover:text-primary">
+                                    <i class="fas fa-plus text-xs"></i>
+                                </button>
+                            </div>
+                            <span class="font-bold text-primary">\$${(item.price * item.quantity).toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function checkoutCart() {
+            if (cart.length === 0) return;
+            
+            // Create order from cart
+            const orderId = 'UNI-' + Math.floor(10000 + Math.random() * 90000);
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            const order = {
+                id: orderId,
+                items: [...cart],
+                total: subtotal,
+                date: new Date().toISOString(),
+                status: 'Completed'
+            };
+            
+            orders.push(order);
+            localStorage.setItem('uni_orders', JSON.stringify(orders));
+            
+            // Clear cart
+            cart = [];
+            localStorage.setItem('uni_cart', JSON.stringify(cart));
+            updateCartBadge();
+            
+            // Show success and navigate to orders
             showToast('Order placed successfully!');
+            navigateTo('orders-section');
+            renderOrders();
+        }
+        
+        // --- ORDERS FUNCTIONS ---
+        function renderOrders() {
+            const ordersList = document.getElementById('orders-list');
+            const emptyOrders = document.getElementById('empty-orders');
+            
+            if (orders.length === 0) {
+                ordersList.innerHTML = '';
+                emptyOrders.classList.remove('hidden');
+                document.getElementById('orders-count').textContent = '0 orders';
+                return;
+            }
+            
+            emptyOrders.classList.add('hidden');
+            document.getElementById('orders-count').textContent = `${orders.length} order${orders.length > 1 ? 's' : ''}`;
+            
+            // Sort by date (newest first)
+            const sortedOrders = [...orders].reverse();
+            
+            ordersList.innerHTML = sortedOrders.map(order => {
+                const date = new Date(order.date);
+                const formattedDate = date.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                const statusColors = {
+                    'Completed': 'bg-green-100 text-green-700',
+                    'Processing': 'bg-yellow-100 text-yellow-700',
+                    'Shipped': 'bg-blue-100 text-blue-700',
+                    'Cancelled': 'bg-red-100 text-red-700'
+                };
+                
+                return `
+                    <div class="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-start mb-4 pb-4 border-b border-gray-100">
+                            <div>
+                                <h3 class="font-bold text-gray-800">Order ${order.id}</h3>
+                                <p class="text-xs text-gray-500">${formattedDate}</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-bold ${statusColors[order.status] || 'bg-gray-100 text-gray-700'}">
+                                ${order.status}
+                            </span>
+                        </div>
+                        
+                        <div class="space-y-3 mb-4">
+                            ${order.items.map(item => `
+                                <div class="flex gap-3 items-center">
+                                    <img src="${item.img}" class="w-12 h-12 md:w-16 md:h-16 rounded-lg object-cover">
+                                    <div class="flex-1">
+                                        <h4 class="font-medium text-sm text-gray-800">${item.title}</h4>
+                                        <p class="text-xs text-gray-500">Qty: ${item.quantity || 1}</p>
+                                    </div>
+                                    <span class="font-bold text-sm text-primary">\$${((item.price || 0) * (item.quantity || 1)).toFixed(2)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="flex justify-between items-center pt-4 border-t border-gray-100">
+                            <span class="font-bold text-gray-800">Total</span>
+                            <span class="font-bold text-lg text-primary">\$${order.total.toFixed(2)}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
     </script>
 </body>
